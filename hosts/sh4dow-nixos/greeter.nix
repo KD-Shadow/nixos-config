@@ -3,7 +3,11 @@
 {
   imports = [
     inputs.noctalia-greeter.nixosModules.default
+    inputs.mangowm.nixosModules.mango
+
   ];
+
+  programs.mango.enable=true;
 
   services.displayManager.noctalia-greeter = {
     enable = true;

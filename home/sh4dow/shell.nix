@@ -291,5 +291,6 @@
   };
 
   xdg.configFile."starship.toml".source =
-    ../../dotfiles/starship/starship.toml;
+  config.lib.file.mkOutOfStoreSymlink
+    "${config.home.homeDirectory}/nixos-config/dotfiles/starship/starship.toml";
 }

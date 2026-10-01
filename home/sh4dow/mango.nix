@@ -1,6 +1,6 @@
-{ config, pkgs, ... }:
-
+{ config, ... }:
 {
   xdg.configFile."mango".source =
-    ../../dotfiles/mango;
+    config.lib.file.mkOutOfStoreSymlink
+      "${config.home.homeDirectory}/nixos-config/dotfiles/mango";
 }

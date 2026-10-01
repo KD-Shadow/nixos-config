@@ -1,6 +1,6 @@
-{ config, pkgs, ... }:
-
+{ config, ... }:
 {
   xdg.configFile."nvim".source =
-    ../../dotfiles/nvim;
+    config.lib.file.mkOutOfStoreSymlink
+      "${config.home.homeDirectory}/nixos-config/dotfiles/nvim";
 }

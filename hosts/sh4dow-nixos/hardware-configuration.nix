@@ -14,40 +14,18 @@
   boot.extraModulePackages = [ ];
 
   fileSystems."/" =
-    { device = "/dev/mapper/cryptroot";
-      fsType = "btrfs";
-      options = [ "subvol=@" "compress=zstd" "noatime" ];
-    };
-
-  boot.initrd.luks.devices."cryptroot".device = "/dev/disk/by-uuid/a7e66bc8-00ea-4e31-8907-583b6b0394ab";
-
-
-  fileSystems."/home" =
-    { device = "/dev/mapper/cryptroot";
-      fsType = "btrfs";
-      options = [ "subvol=@home" "compress=zstd" "noatime" ];
-    };
-
-  fileSystems."/nix" =
-    { device = "/dev/mapper/cryptroot";
-      fsType = "btrfs";
-      options = [ "subvol=@nix" "compress=zstd" "noatime" ];
-    };
-
-  fileSystems."/var/log" =
-    { device = "/dev/mapper/cryptroot";
-      fsType = "btrfs";
-      options = [ "subvol=@log" "compress=zstd" "noatime" ];
+    { device = "/dev/disk/by-uuid/79cfe657-b1f7-46e5-ad97-9cd8508e9839";
+      fsType = "ext4";
     };
 
   fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/F4FB-0E9A";
+    { device = "/dev/disk/by-uuid/941C-8AF2";
       fsType = "vfat";
-      options = [ "fmask=0022" "dmask=0022" ];
+      options = [ "fmask=0077" "dmask=0077" ];
     };
 
   swapDevices =
-    [ { device = "/dev/disk/by-uuid/328d832d-3e2d-49a5-8b5e-20c94d49dd57"; }
+    [ { device = "/dev/disk/by-uuid/983a1e2c-00ea-40bd-a6a3-ed6fb7535bcd"; }
     ];
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";

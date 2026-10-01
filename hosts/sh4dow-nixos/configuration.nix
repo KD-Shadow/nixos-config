@@ -51,6 +51,8 @@
   };
 
   programs.fish.enable = true;
+  hardware.graphics.enable = true;
+  environment.pathsToLink = [ "/share/wayland-sessions" "/share/xsessions" ];
 
   environment.systemPackages = with pkgs; [
     git
