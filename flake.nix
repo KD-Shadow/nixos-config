@@ -1,12 +1,31 @@
 {
   description= " My NixOs Configuration";
 
+  nixConfig = {
+  extra-substituters = [
+    "https://noctalia.cachix.org"
+  ];
+
+  extra-trusted-public-keys = [
+    "noctalia.cachix.org-1:pCOR47nnMEo5thcxNDtzWpOxNFQsBRglJzxWPp3dkU4="
+  ];
+  };
+
   inputs={
     nixpkgs.url="github:nixos/nixpkgs/nixos-unstable";
 
     home-manager={
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
+    };
+    noctalia = {
+      url = "github:noctalia-dev/noctalia";
+    };
+    noctalia-greeter = {
+      url = "github:noctalia-dev/noctalia-greeter";
+    };
+    mangowm = {
+      url = "github:mangowm/mango";
     };
   };
 
