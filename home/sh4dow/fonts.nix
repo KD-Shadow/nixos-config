@@ -2,7 +2,7 @@
 
 {
   home.packages = with pkgs; [
-    bitstream-vera
+    ttf_bitstream_vera
     dejavu_fonts
 
     jetbrains-mono
@@ -13,7 +13,6 @@
     open-sans
 
     adwaita-fonts
-    awesome-terminal-fonts
     cantarell-fonts
 
     noto-fonts

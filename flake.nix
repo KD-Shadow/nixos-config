@@ -42,6 +42,7 @@
         home-manager = {
           useGlobalPkgs = true;
           useUserPackages = true;
+          extraSpecialArgs = { inherit inputs; };
           users.sh4dow = import ./home/sh4dow;
           backupFileExtension = "backup";
         };

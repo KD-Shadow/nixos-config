@@ -54,7 +54,7 @@
       superfile
       eog
       github-cli
-      zed
+      zed-editor
       rmpc 
       cliphist
       wl-clipboard
@@ -64,7 +64,7 @@
       bun
       zathura
       zathuraPkgs.zathura_pdf_mupdf
-      libreoffice-fresh
+      libreoffice-stable
   ];
 
   programs.home-manager.enable=true;
