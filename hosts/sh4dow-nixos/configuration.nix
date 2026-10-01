@@ -56,6 +56,7 @@
     git
     curl
     wget
+    efibootmgr
   ];
 
   system.stateVersion = "26.05";
