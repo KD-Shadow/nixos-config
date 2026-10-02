@@ -14,7 +14,7 @@
 
     settings = {
       cursor = {
-        theme = "Capitaine Cursors";
+        theme = "capitaine-cursors";
         size = 24;
         path = "${pkgs.capitaine-cursors}/share/icons";
       };

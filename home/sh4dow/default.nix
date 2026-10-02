@@ -8,6 +8,8 @@
   ./terminals.nix
   ./fonts.nix
   ./nvim.nix
+  ./gtk.nix
+  ./utils.nix
   ];
 
   home.username="sh4dow";
@@ -19,6 +21,7 @@
       ripgrep 
       fd 
       fzf 
+      glib
       btop
       neovim
       bat
@@ -59,12 +62,12 @@
       cliphist
       wl-clipboard
       wl-clip-persist
-      xdg-desktop-portal-wlr
       obsidian
       bun
       zathura
       zathuraPkgs.zathura_pdf_mupdf
       libreoffice-stable
+      localsend
   ];
 
   programs.home-manager.enable=true;

@@ -14,6 +14,12 @@
       enable = true;
       efiSupport = true;
       maxGenerations = 10;
+
+      style = {
+        wallpapers = [
+          ../../assets/wallpapers/wallhaven-ex.png
+        ];
+      };
     };
   };
 
@@ -48,9 +54,20 @@
       "wheel"
       "networkmanager"
     ];
+    shell=pkgs.fish;
+  };
+  xdg.portal = {
+    enable = true;
+
+    extraPortals = with pkgs;[
+      xdg-desktop-portal-gtk
+      xdg-desktop-portal-wlr
+    ];
+    config.common.default = "";
   };
 
   programs.fish.enable = true;
+  programs.dconf.enable = true;
   hardware.graphics.enable = true;
   environment.pathsToLink = [ "/share/wayland-sessions" "/share/xsessions" ];
 
@@ -59,6 +76,7 @@
     curl
     wget
     efibootmgr
+    xdg-utils
   ];
 
   system.stateVersion = "26.05";
