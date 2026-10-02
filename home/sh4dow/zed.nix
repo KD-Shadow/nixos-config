@@ -1,0 +1,264 @@
+{ ... }:
+
+{
+  programs.zed-editor = {
+    enable = true;
+
+    extensions = ["html" "toml" "symbols" "python-requirements" "aura-theme" "rust-snippets" "python-requirements" "nix" "rust"];
+
+    userSettings = {
+      active_pane_modifiers = {
+        border_size = 0.0;
+      };
+      window_decorations = "client";
+      use_system_window_tabs = false;
+      proxy = "";
+
+      completions = {
+        lsp = true;
+        lsp_fetch_timeout_ms = 0;
+      };
+
+      colorize_brackets = false;
+      code_lens = "on";
+      lsp_document_colors = "inlay";
+
+      inlay_hints = {
+        scroll_debounce_ms = 50;
+        edit_debounce_ms = 700;
+        show_background = false;
+        show_other_hints = true;
+        show_value_hints = true;
+        enabled = true;
+      };
+
+      vim = {
+        use_smartcase_find = true;
+        toggle_relative_line_numbers = true;
+      };
+
+      minimap = {
+        show = "never";
+      };
+
+      buffer_font_weight = 400.0;
+
+      collaboration_panel = {
+        dock = "left";
+      };
+
+      agent = {
+        dock = "right";
+        favorite_models = [ ];
+        model_parameters = [ ];
+      };
+
+      git_panel = {
+        dock = "left";
+      };
+
+      disable_ai = true;
+      relative_line_numbers = "enabled";
+
+      icon_theme = {
+        mode = "dark";
+        light = "Symbols Icon Theme";
+        dark = "Symbols Icon Theme";
+      };
+
+      theme = {
+        mode = "dark";
+        light = "One Light";
+        dark = "Noctalia Dark Transparent";
+      };
+
+      theme_overrides = {
+        "Noctalia Dark" = {
+          syntax = {
+            comment = {
+              font_style = "italic";
+            };
+            "comment.doc" = {
+              font_style = "italic";
+            };
+          };
+        };
+      };
+
+      title_bar = {
+        button_layout = "platform_default";
+        show_branch_status_icon = true;
+        show_menus = false;
+        show_user_picture = true;
+        show_sign_in = true;
+        show_onboarding_banner = false;
+        show_project_items = true;
+        show_branch_name = true;
+        show_user_menu = true;
+      };
+
+      tab_bar = {
+        show = false;
+      };
+
+      toolbar = {
+        selections_menu = true;
+        agent_review = false;
+        breadcrumbs = false;
+        quick_actions = false;
+      };
+
+      status_bar = {
+        "experimental.show" = false;
+      };
+
+      project_panel = {
+        sort_order = "default";
+        hide_hidden = false;
+        git_status_indicator = false;
+        diagnostic_badges = false;
+        auto_reveal_entries = true;
+        folder_icons = true;
+        file_icons = true;
+        entry_spacing = "comfortable";
+        hide_gitignore = false;
+        dock = "right";
+        default_width = 200.0;
+        hide_root = true;
+        auto_fold_dirs = false;
+        starts_open = false;
+        git_status = true;
+        sticky_scroll = false;
+        scrollbar = {
+          show = "never";
+        };
+        indent_guides = {
+          show = "never";
+        };
+      };
+
+      outline_panel = {
+        file_icons = true;
+        dock = "left";
+        default_width = 300;
+        indent_guides = {
+          show = "never";
+        };
+      };
+
+      file_finder = {
+        modal_max_width = "large";
+      };
+
+      scrollbar = {
+        cursors = true;
+        show = "never";
+      };
+
+      gutter = {
+        min_line_number_digits = 0;
+        folds = false;
+        runnables = false;
+      };
+
+      indent_guides = {
+        coloring = "indent_aware";
+        active_line_width = 1;
+        line_width = 0;
+        enabled = false;
+      };
+
+      ui_font_family = "JetBrainsMono Nerd Font";
+      ui_font_size = 12.0;
+      buffer_font_family = "JetBrainsMono Nerd Font";
+      buffer_font_size = 12.0;
+      buffer_line_height = {
+        custom = 2;
+      };
+      agent_buffer_font_size = 12.0;
+
+      vim_mode = true;
+      multi_cursor_modifier = "cmd_or_ctrl";
+      cursor_shape = "block";
+      cursor_blink = false;
+      selection_highlight = false;
+      drag_and_drop_selection = {
+        enabled = false;
+      };
+
+      # seed_search_query_from_cursor = "never";
+      current_line_highlight = "none";
+      show_whitespaces = "none";
+      tab_size = 4;
+      # auto_indent = false;
+      # auto_indent_on_paste = false;
+      show_completions_on_input = true;
+      show_completion_documentation = false;
+      inline_code_actions = false;
+      # lsp_document_colors = "none";
+      hover_popover_enabled = false;
+      format_on_save = "on";
+      autosave = {
+        after_delay = {
+          milliseconds = 1000;
+        };
+      };
+      auto_update = true;
+      # extend_comment_on_newline = false;
+      # horizontal_scroll_margin = 1;
+      # vertical_scroll_margin = 1;
+      # when_closing_with_no_tabs = "keep_window_open";
+      close_on_file_delete = true;
+      restore_on_file_reopen = true;
+      restore_on_startup = "last_session";
+      session = {
+        restore_unsaved_buffers = true;
+      };
+
+      git = {
+        git_gutter = "hide";
+        inline_blame = {
+          show_commit_summary = true;
+          padding = 4;
+          location = "inline";
+          enabled = true;
+        };
+      };
+
+      centered_layout = {
+        right_padding = 0.15;
+        left_padding = 0.15;
+      };
+
+      languages = {
+        Python = {
+          language_servers = [
+            "basedpyright"
+            "ruff"
+          ];
+          formatter = {
+            language_server = {
+              name = "ruff";
+            };
+          };
+          code_actions_on_format = {
+            "source.organizeImports.ruff" = true;
+          };
+        };
+      };
+
+      lsp = {
+        basedpyright = {
+          initialization_options = {
+            basedpyright = {
+              analysis = {
+                diagnosticMode = "openFilesOnly";
+              };
+            };
+          };
+        };
+      };
+    };
+  };
+}
+

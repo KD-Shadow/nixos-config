@@ -10,6 +10,7 @@
   ./nvim.nix
   ./gtk.nix
   ./utils.nix
+  ./zed.nix
   ];
 
   home.username="sh4dow";
@@ -68,6 +69,8 @@
       zathuraPkgs.zathura_pdf_mupdf
       libreoffice-stable
       localsend
+      inputs.helium.packages.${pkgs.system}.default
+
   ];
 
   programs.home-manager.enable=true;

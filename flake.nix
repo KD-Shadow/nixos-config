@@ -3,11 +3,14 @@
 
   nixConfig = {
   extra-substituters = [
-    "https://noctalia.cachix.org"
+   "https://noctalia.cachix.org"
+#   "https://attic.xuyh0120.win/lantian"
   ];
 
   extra-trusted-public-keys = [
     "noctalia.cachix.org-1:pCOR47nnMEo5thcxNDtzWpOxNFQsBRglJzxWPp3dkU4="
+   # "lantian:EeAUQ+W+6r7EtwnmYjeVwx5kOGEBpjlBfPlzGlTNvHc="
+
   ];
   };
 
@@ -30,10 +33,17 @@
       url = "github:mangowm/mango";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    helium = {
+      url = "github:AlvaroParker/helium-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    nix-cachyos-kernel.url = 
+      "github:xddxdd/nix-cachyos-kernel/release";
+    
   };
 
 
-  outputs = {self, nixpkgs, home-manager, ...}@inputs:{
+  outputs = {self, nixpkgs, home-manager,nix-cachyos-kernel, ...}@inputs:{
     nixosConfigurations.sh4dow-nixos = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = { inherit inputs; };
@@ -42,6 +52,10 @@
       ./hosts/sh4dow-nixos/configuration.nix
       home-manager.nixosModules.home-manager
       {
+
+        nixpkgs.overlays = [
+              nix-cachyos-kernel.overlays.pinned
+        ];
         home-manager = {
           useGlobalPkgs = true;
           useUserPackages = true;

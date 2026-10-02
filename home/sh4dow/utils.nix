@@ -3,5 +3,6 @@
 #xdg user dirs
   xdg.userDirs = {
     enable = true;
+    setSessionVariables = true;
   };
 }

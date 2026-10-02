@@ -6,6 +6,9 @@
     ./greeter.nix
   ];
 
+#  boot.kernelPackages = pkgs.linuxPackages_zen;
+  boot.kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-latest;
+
   boot.loader = {
     systemd-boot.enable = false;
     efi.canTouchEfiVariables = true;
@@ -52,6 +55,7 @@
     isNormalUser = true;
     extraGroups = [
       "wheel"
+      "docker"
       "networkmanager"
     ];
     shell=pkgs.fish;
@@ -68,6 +72,7 @@
 
   programs.fish.enable = true;
   programs.dconf.enable = true;
+  virtualisation.docker.enable = true;
   hardware.graphics.enable = true;
   environment.pathsToLink = [ "/share/wayland-sessions" "/share/xsessions" ];
 
