@@ -37,6 +37,8 @@
       url = "github:AlvaroParker/helium-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # umbriel.url = "github:noctalia-dev/umbriel";
+
     nix-cachyos-kernel.url = 
       "github:xddxdd/nix-cachyos-kernel/release";
     
@@ -60,7 +62,13 @@
           useGlobalPkgs = true;
           useUserPackages = true;
           extraSpecialArgs = { inherit inputs; };
-          users.sh4dow = import ./home/sh4dow;
+          users.sh4dow = {
+            imports = [
+              # inputs.umbriel.homeModules.default
+              ./home/sh4dow
+            ];
+          };
+
           backupFileExtension = "backup";
         };
       }

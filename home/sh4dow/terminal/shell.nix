@@ -107,6 +107,7 @@
       gob = "go build";
       gor = "go run";
       got = "go test";
+
     };
 
     shellAbbrs = {
@@ -130,6 +131,12 @@
       mkcd = ''
         mkdir -p $argv[1]
         cd $argv[1]
+      '';
+
+      nixrebuild = ''
+            cd ~/nixos-config/
+            git add .
+            sudo nixos-rebuild switch --flake .#sh4dow-nixos
       '';
 
       extract = ''

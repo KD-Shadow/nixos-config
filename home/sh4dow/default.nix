@@ -1,16 +1,17 @@
 {config,pkgs,inputs,...}:{
   imports =[
-  ./git.nix
-  ./shell.nix
-  ./ssh.nix
-  ./noctalia.nix
-  ./mango.nix
-  ./terminals.nix
-  ./fonts.nix
-  ./nvim.nix
-  ./gtk.nix
-  ./utils.nix
-  ./zed.nix
+  ./development/git.nix
+  ./terminal/shell.nix
+  ./development/ssh.nix
+  ./desktop/noctalia.nix
+  ./desktop/mango.nix
+  ./terminal/terminals.nix
+  ./desktop/fonts.nix
+  ./development/nvim.nix
+  ./desktop/gtk.nix
+  ./system/utils.nix
+  ./applications/zed.nix
+  ./applications/youtube-music.nix
   ];
 
   home.username="sh4dow";
@@ -20,6 +21,7 @@
 
   home.packages = with pkgs;[
       ripgrep 
+      tree
       fd 
       fzf 
       glib
@@ -66,12 +68,44 @@
       obsidian
       bun
       zathura
+      ghgrab
       zathuraPkgs.zathura_pdf_mupdf
       libreoffice-stable
       localsend
       inputs.helium.packages.${pkgs.system}.default
-
   ];
 
   programs.home-manager.enable=true;
+
+#mime types
+  xdg.mimeApps = {
+    enable = true;
+    defaultApplications = {
+      "text/html" = "helium.desktop";
+      "x-scheme-handler/http" = "helium.desktop";
+      "x-scheme-handler/https" = "helium.desktop";
+
+      # PDF
+      "application/pdf" = "org.pwmt.zathura.desktop";
+
+      # Images
+      "image/png" = "org.gnome.eog.desktop";
+      "image/jpeg" = "eog.desktop";
+      "image/webp" = "eog.desktop";
+
+      # Text / code
+      "text/plain" = "nvim.desktop";
+
+      # File manager
+      "inode/directory" = "pcmanfm.desktop";
+
+      # Video
+      "video/mp4" = "mpv.desktop";
+      "video/webm" = "mpv.desktop";
+
+      # Audio
+      "audio/mpeg" = "mpv.desktop";
+      "audio/ogg" = "mpv.desktop";
+    };
+  };
 }
