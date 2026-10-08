@@ -408,25 +408,9 @@
           compositor = "mangowc";
           mangowc_config = "/home/sh4dow/.config/mango/mango-config/bind.conf";
         };
-
-        "noctalia/mpvpaper" = {
-          video_directory = "~/Videos";
-        };
-
         "noctalia/wallhaven" = {
           browser_open_near_click = true;
-          download_dir = "/home/sh4dow/Pictures/wallpapers";
-        };
-
-        "yngwe/wallpaperCarousel" = {
-          carouselMode = "infinite";
-          itemHeight = 297;
-          itemWidth = 225;
-        };
-
-        "yuuto/arch-updater" = {
-          aur_helper = "yay";
-          terminal = "ghostty";
+          download_dir = "/home/sh4dow/nixos-config/assets/wallpapers";
         };
       };
 
@@ -434,7 +418,6 @@
         enabled = [
           "noctalia/wallhaven"
           "dotnetrob/cat"
-          "yuuto/arch-updater"
           "theblackdon/theme-switcher"
           "ashur-d/nvim-projects"
         ];
@@ -452,13 +435,6 @@
             kind = "git";
             location = "https://github.com/noctalia-dev/community-plugins";
             name = "community";
-          }
-
-          {
-            enabled = false;
-            kind = "git";
-            location = "https://github.com/noctalia-dev/community-plugins.git";
-            name = "community-plugins";
           }
         ];
       };
@@ -525,17 +501,11 @@
             "fastfetch"
             "zathura"
             "bat"
-            "herdr"
             "lazygit"
           ];
 
           enable_builtin_templates = true;
           enable_community_templates = true;
-
-          litexl = {
-            input_path = "/home/sh4dow/.config/noctalia/templates/lite-xl.lua";
-            output_path = "~/.config/lite-xl/colors/matugen.lua";
-          };
 
           rmpc = {
             input_path = "/home/sh4dow/.config/noctalia/templates/rmpc.ron";
@@ -550,7 +520,7 @@
       };
 
       wallpaper = {
-        directory = "/home/sh4dow/Pictures/wallpapers";
+        directory = "/home/sh4dow/nixos-config/assets/wallpapers";
         transition_on_startup = true;
 
         automation = {
@@ -559,16 +529,16 @@
         };
 
         default = {
-          path = "/home/sh4dow/Pictures/wallpapers/wallhaven-ex.png";
+          path = "/home/sh4dow/nixos-config/assets/wallpapers/wallhaven-ex.png";
         };
 
         last = {
-          path = "/home/sh4dow/Pictures/wallpapers/wallhaven-ex.png";
+          path = "/home/sh4dow/nixos-config/assets/wallpapers/wallhaven-ex.png";
         };
 
         monitors = {
           "eDP-1" = {
-            path = "/home/sh4dow/Pictures/wallpapers/wallhaven-ex.png";
+          path = "/home/sh4dow/nixos-config/assets/wallpapers/wallhaven-ex.png";
           };
         };
       };
@@ -590,10 +560,6 @@
           format = "{:%I:%M %p}";
         };
 
-        mpvpaper = {
-          type = "noctalia/mpvpaper:mpvpaper";
-        };
-
         network = {
           show_label = false;
         };
@@ -601,11 +567,6 @@
         wallhaven = {
           type = "noctalia/wallhaven:wallhaven";
         };
-
-        widget = {
-          type = "yuuto/arch-updater:widget";
-        };
-
         workspaces = {
           hide_when_empty = true;
           scale = 0.9;

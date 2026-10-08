@@ -72,7 +72,10 @@
       zathuraPkgs.zathura_pdf_mupdf
       libreoffice-stable
       localsend
-      inputs.helium.packages.${pkgs.system}.default
+      surge-downloader
+      inputs.helium.packages.${pkgs.stdenv.hostPlatform.system}.default
+      inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
+
   ];
 
   programs.home-manager.enable=true;
