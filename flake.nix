@@ -17,6 +17,8 @@
   inputs={
     nixpkgs.url="github:nixos/nixpkgs/nixos-unstable";
 
+    chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
+
     home-manager={
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -42,13 +44,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     # umbriel.url = "github:noctalia-dev/umbriel";
-    nix-cachyos-kernel.url = 
-      "github:xddxdd/nix-cachyos-kernel/release";
+    
     
   };
 
 
-  outputs = {self, nixpkgs, home-manager,nix-cachyos-kernel, ...}@inputs:{
+  outputs = {self, nixpkgs, home-manager,chaotic, ...}@inputs:{
     nixosConfigurations.sh4dow-nixos = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = { inherit inputs; };
@@ -56,11 +57,8 @@
       modules = [
       ./hosts/sh4dow-nixos/configuration.nix
       home-manager.nixosModules.home-manager
+      chaotic.nixosModules.default
       {
-
-        nixpkgs.overlays = [
-              nix-cachyos-kernel.overlays.pinned
-        ];
         home-manager = {
           useGlobalPkgs = true;
           useUserPackages = true;
