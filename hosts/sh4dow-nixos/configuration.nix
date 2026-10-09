@@ -34,7 +34,7 @@
     loader.timeout = 0;
   };
 #  boot.kernelPackages = pkgs.linuxPackages_zen;
-  boot.kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-latest;
+  boot.kernelPackages = pkgs.linuxPackages_cachyos;
 
   boot.loader = {
     systemd-boot.enable = false;
