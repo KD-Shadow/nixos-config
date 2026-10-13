@@ -43,6 +43,8 @@
       url = "github:youwen5/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    zennotes.url = "github:ZenNotes/zennotes";
+
     # umbriel.url = "github:noctalia-dev/umbriel";
     
     

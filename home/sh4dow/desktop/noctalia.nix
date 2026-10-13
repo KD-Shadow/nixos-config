@@ -499,6 +499,10 @@
             "obsidian"
             "zed"
             "fastfetch"
+            "tmux"
+            "neovim"
+            "superfile"
+            "surgedm"
             "zathura"
             "bat"
             "lazygit"
@@ -506,16 +510,6 @@
 
           enable_builtin_templates = true;
           enable_community_templates = true;
-
-          rmpc = {
-            input_path = "/home/sh4dow/.config/noctalia/templates/rmpc.ron";
-            output_path = "~/.config/rmpc/themes/matugen.ron";
-          };
-
-          rofi = {
-            input_path = "/home/sh4dow/.config/noctalia/templates/rofi-colors.rasi";
-            output_path = "/home/sh4dow/.config/rofi/colors.rasi";
-          };
         };
       };
 

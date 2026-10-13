@@ -7,6 +7,7 @@
   ./desktop/mango.nix
   ./terminal/terminals.nix
   ./desktop/fonts.nix
+  ./development/tmux.nix
   ./development/nvim.nix
   ./desktop/gtk.nix
   ./system/utils.nix
@@ -33,6 +34,7 @@
       luaPackages.tree-sitter-cli
       luarocks
       gcc
+      mdfried
       rustup
       python3
       tmux
@@ -46,7 +48,7 @@
       ffmpeg
       yt-dlp
       cava
-      pcmanfm
+      nautilus
       fastfetch
       brightnessctl
       mpd
@@ -55,26 +57,29 @@
       adw-gtk3
       capitaine-cursors
       kora-icon-theme
-      nwg-look
       neovide
       superfile
       eog
       github-cli
       zed-editor
-      rmpc 
+      cliamp 
       cliphist
       wl-clipboard
       wl-clip-persist
-      obsidian
       bun
       zathura
       ghgrab
+      bat
       zathuraPkgs.zathura_pdf_mupdf
       libreoffice-stable
+      tuxedo
+      google-cursor
       localsend
       surge-downloader
       inputs.helium.packages.${pkgs.stdenv.hostPlatform.system}.default
       inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
+      inputs.zennotes.packages.${pkgs.stdenv.hostPlatform.system}.zennotes-desktop
+
 
   ];
 
@@ -98,9 +103,10 @@
 
       # Text / code
       "text/plain" = "nvim.desktop";
+      "text/markdown" = "mdfried.desktop";
 
       # File manager
-      "inode/directory" = "pcmanfm.desktop";
+      "inode/directory" = "nautilus.desktop";
 
       # Video
       "video/mp4" = "mpv.desktop";

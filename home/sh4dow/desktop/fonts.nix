@@ -2,7 +2,7 @@
 
 {
   home.packages = with pkgs; [
-    ttf_bitstream_vera
+    ttf-bitstream-vera
     dejavu_fonts
 
     jetbrains-mono
