@@ -44,6 +44,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     zennotes.url = "github:ZenNotes/zennotes";
+    limusic.url = "path:./apps/limusic";
 
     # umbriel.url = "github:noctalia-dev/umbriel";
     

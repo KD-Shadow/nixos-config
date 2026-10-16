@@ -13,6 +13,7 @@
   ./system/utils.nix
   ./applications/zed.nix
   ./applications/youtube-music.nix
+  ./applications/tldraw.nix
   ];
 
   home.username="sh4dow";
@@ -74,13 +75,14 @@
       libreoffice-stable
       tuxedo
       google-cursor
+      yaak
       localsend
       surge-downloader
+      kitty
       inputs.helium.packages.${pkgs.stdenv.hostPlatform.system}.default
       inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
       inputs.zennotes.packages.${pkgs.stdenv.hostPlatform.system}.zennotes-desktop
-
-
+      inputs.limusic.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
   programs.home-manager.enable=true;

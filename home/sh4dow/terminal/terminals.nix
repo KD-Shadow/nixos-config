@@ -97,4 +97,39 @@
       theme = "noctalia";
     };
   };
+  programs.kitty = {
+    enable = true;
+
+    font = {
+      name = "JetBrainsMono Nerd Font Mono";
+      size = 9;
+    };
+
+    settings = {
+      cursor_shape = "block";
+      sync_to_monitor = "yes";
+      repaint_delay = 8;
+      input_delay = 0;
+      cursor_blink_interval = "0.5";
+      cursor_stop_blinking_after = 15;
+      scrollback_lines = 2000;
+      copy_on_select = "yes";
+      mouse_hide_wait = 0;
+      select_by_word_characters = "@-./_~?&=%+#a";
+      enable_audio_bell = "no";
+      bell_on_tab = "🔔 ";
+      remember_window_size = "no";
+      window_border_width = "1pt";
+      draw_minimal_borders = "yes";
+      window_padding_width = 15;
+      inactive_text_alpha = 0.6;
+      hide_window_decorations = "yes";
+      confirm_os_window_close = 0;
+      tab_bar_style = "powerline";
+    };
+
+    extraConfig = ''
+      include themes/noctalia.conf
+    '';
+  };
 }
