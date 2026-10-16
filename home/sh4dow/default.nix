@@ -31,6 +31,7 @@
       neovim
       bat
       nodejs
+      power-profiles-daemon
       lua
       luaPackages.tree-sitter-cli
       luarocks
