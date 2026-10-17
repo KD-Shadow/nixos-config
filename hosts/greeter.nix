@@ -4,7 +4,6 @@
   imports = [
     inputs.noctalia-greeter.nixosModules.default
     inputs.mangowm.nixosModules.mango
-
   ];
 
   programs.mango.enable=true;

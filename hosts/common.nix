@@ -26,6 +26,12 @@
     # It will just not appear on screen unless a key is pressed
     loader.timeout = 5;
   };
+# zram swap
+  zramSwap = {
+    enable = true;
+    algorithm = "zstd";
+    memoryPercent = 50;
+  };
 #  boot.kernelPackages = pkgs.linuxPackages_zen;
   boot.kernelPackages = pkgs.linuxPackages_cachyos;
 

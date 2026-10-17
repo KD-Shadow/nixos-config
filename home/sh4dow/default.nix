@@ -26,6 +26,8 @@
       tree
       fd 
       fzf 
+      uv
+      herdr
       glib
       btop
       neovim
@@ -83,6 +85,7 @@
       inputs.helium.packages.${pkgs.stdenv.hostPlatform.system}.default
       inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
       inputs.zennotes.packages.${pkgs.stdenv.hostPlatform.system}.zennotes-desktop
+      inputs.opentubex.packages.${pkgs.stdenv.hostPlatform.system}.opentubex
       inputs.limusic.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
@@ -101,8 +104,9 @@
 
       # Images
       "image/png" = "org.gnome.eog.desktop";
-      "image/jpeg" = "eog.desktop";
-      "image/webp" = "eog.desktop";
+      "image/jpeg" = "org.gnome.eog.desktop";
+      "image/jpg" = "org.gnome.eog.desktop";
+      "image/webp" = "org.gnome.eog.desktop";
 
       # Text / code
       "text/plain" = "nvim.desktop";

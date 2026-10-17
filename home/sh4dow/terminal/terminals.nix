@@ -51,18 +51,6 @@
         multiplier = 3;
       };
 
-      bell = {
-        animation = "Linear";
-        duration = 0;
-
-        command = {
-          program = "paplay";
-          args = [
-            "/usr/share/sounds/freedesktop/stereo/dialog-error.oga"
-          ];
-        };
-      };
-
       font = {
         size = 9;
         builtin_box_drawing = true;

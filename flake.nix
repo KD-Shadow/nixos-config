@@ -45,10 +45,8 @@
     };
     zennotes.url = "github:ZenNotes/zennotes";
     limusic.url = "path:./apps/limusic";
-
+    opentubex.url = "github:OpenTubeX/nix";
     # umbriel.url = "github:noctalia-dev/umbriel";
-    
-    
   };
 
 

@@ -143,7 +143,6 @@ return {
         "scss",
         "graphql",
         "http",
-        "handlebars",
         "astro",
         "python",
         "rust",
