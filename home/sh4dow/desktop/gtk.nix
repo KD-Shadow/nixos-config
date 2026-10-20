@@ -1,6 +1,12 @@
 { config, pkgs, inputs, ... }:
 
 {
+
+  imports = [
+  # ./cursors/NierAutomataCursors.nix
+  ./cursors/ModestDarkCursors.nix
+  ];
+  home.pointerCursor.enable = true;
   gtk = {
     enable = true;
 
@@ -17,11 +23,11 @@
     iconTheme = {
       name = "kora";
     };
-
-    cursorTheme = {
-      name = "capitaine cursors";
-      size = 24;
-    };
+    #
+    # cursorTheme = {
+    #   name = "capitaine cursors";
+    #   size = 24;
+    # };
 
     font = {
       name = "JetBrainsMono Nerd Font Mono";

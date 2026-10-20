@@ -11,6 +11,7 @@
   ./development/nvim.nix
   ./desktop/gtk.nix
   ./system/utils.nix
+  ./applications/librewolf.nix
   ./applications/zed.nix
   ./applications/youtube-music.nix
   ./applications/tldraw.nix
@@ -26,7 +27,6 @@
       tree
       fd 
       fzf 
-      uv
       herdr
       glib
       btop
@@ -40,7 +40,6 @@
       gcc
       mdfried
       rustup
-      python3
       tmux
       eza
       zip 
@@ -66,6 +65,7 @@
       eog
       github-cli
       zed-editor
+      file
       cliamp 
       cliphist
       wl-clipboard
@@ -81,15 +81,33 @@
       yaak
       localsend
       surge-downloader
+      jq
+      opencode
+      firefox
       kitty
+      imagemagick
+      librewolf
+      wine
       inputs.helium.packages.${pkgs.stdenv.hostPlatform.system}.default
-      inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
       inputs.zennotes.packages.${pkgs.stdenv.hostPlatform.system}.zennotes-desktop
-      inputs.opentubex.packages.${pkgs.stdenv.hostPlatform.system}.opentubex
       inputs.limusic.packages.${pkgs.stdenv.hostPlatform.system}.default
+      inputs.opentubex.packages.${pkgs.stdenv.hostPlatform.system}.opentubex
   ];
-
   programs.home-manager.enable=true;
+  #session variables
+  home.sessionVariables = {
+      TERMINAL = "alacritty";
+      EDITOR = "nvim";
+  };
+  #default terminal
+  xdg.terminal-exec = {
+    enable = true;
+    settings = {
+      default = [
+        "Alacritty.desktop"
+      ];
+    };
+  };
 
 #mime types
   xdg.mimeApps = {

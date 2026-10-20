@@ -97,7 +97,10 @@
   services.power-profiles-daemon.enable = true;
   programs.dconf.enable = true;
   virtualisation.docker.enable = true;
-  hardware.graphics.enable = true;
+  hardware.graphics = {
+    enable = true;
+    enable32Bit = true;
+  };
   environment.pathsToLink = [ "/share/wayland-sessions" "/share/xsessions" ];
 
   environment.systemPackages = with pkgs; [
@@ -105,7 +108,9 @@
     curl
     wget
     efibootmgr
+    uv
     xdg-utils
+    python3
   ];
 
 }

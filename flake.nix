@@ -39,14 +39,10 @@
       url = "github:AlvaroParker/helium-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-     zen-browser = {
-      url = "github:youwen5/zen-browser-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     zennotes.url = "github:ZenNotes/zennotes";
     limusic.url = "path:./apps/limusic";
-    opentubex.url = "github:OpenTubeX/nix";
     # umbriel.url = "github:noctalia-dev/umbriel";
+    opentubex.url = "github:OpenTubeX/nix";
   };
 
 
@@ -81,7 +77,6 @@
     nixosConfigurations.sh4dow-secondary = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = { inherit inputs; };
-
       modules = [
       ./hosts/sh4dow-secondary/configuration.nix
       home-manager.nixosModules.home-manager
@@ -97,11 +92,9 @@
               ./home/sh4dow
             ];
           };
-
           backupFileExtension = "backup";
         };
       }
-
       ];
     };
   };

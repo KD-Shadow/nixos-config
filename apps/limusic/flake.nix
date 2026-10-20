@@ -26,11 +26,11 @@
         limusic = pkgs.appimageTools.wrapType2 rec {
 
           pname = "limusic";
-          version = "1.2.0";
+          version = "1.3.0";
 
           src = pkgs.fetchurl {
             url = "https://github.com/SimoHypers/limusic/releases/download/v${version}/${pname}_${version}_amd64.AppImage";
-            sha256 = "sha256:ea0b1680216f26e6ce4e7b4cda9ba04286db417618d3ec2e4782b28e65550c98";
+            sha256 = "sha256:b24856ece79330dd3a63f5af2394e6f838dae74aedc61e3677443de90c2b7387";
           };
 
             extraInstallCommands =
