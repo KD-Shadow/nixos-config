@@ -3,8 +3,8 @@
   programs.git = {
     enable = true;
     settings = {
-      user.name = "Your Name";
-      user.email = "you@example.com";
+      user.name = "KD-Shadow";
+      user.email = "kdshadow189@gmail.com";
       init.defaultBranch = "main";
     };
   };

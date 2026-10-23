@@ -1,4 +1,4 @@
-{pkgs,...}:{
+{pkgs,inputs,...}:{
 # plymouth setup
     boot = {
     plymouth = {
@@ -89,13 +89,22 @@
     extraPortals = with pkgs;[
       xdg-desktop-portal-gtk
       xdg-desktop-portal-wlr
+      inputs.strata.packages.${pkgs.stdenv.hostPlatform.system}.default
     ];
-    config.common.default = "";
+    config.mango = {
+        default = [ "gtk" ];
+
+        "org.freedesktop.impl.portal.FileChooser" = [ "strata" "gtk" ];
+        "org.freedesktop.impl.portal.ScreenCast" = [ "wlr" ];
+        "org.freedesktop.impl.portal.Screenshot" = [ "wlr" ];
+      };
   };
 
   programs.fish.enable = true;
   services.power-profiles-daemon.enable = true;
+  services.udisks2.enable = true;
   programs.dconf.enable = true;
+  programs.nix-ld.enable = true;
   virtualisation.docker.enable = true;
   hardware.graphics = {
     enable = true;
@@ -103,6 +112,12 @@
   };
   environment.pathsToLink = [ "/share/wayland-sessions" "/share/xsessions" ];
 
+# Automatic Nix garbage collection
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 14d";
+  };
   environment.systemPackages = with pkgs; [
     git
     curl
@@ -110,7 +125,11 @@
     efibootmgr
     uv
     xdg-utils
-    python3
+   (pkgs.python3.withPackages (ps: [
+      ps.numpy
+      ps.onnxruntime
+      ps.pillow
+   ]))
   ];
 
 }

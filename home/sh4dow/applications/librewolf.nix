@@ -2,7 +2,7 @@
 
 let
   profile = ".config/librewolf/librewolf/1g1xx0q6.default";
-  chrome = ../../../assets/librewolf/chrome;
+  chrome = ../../../assets/firefox/chrome;
 in
 {
   home.file = {

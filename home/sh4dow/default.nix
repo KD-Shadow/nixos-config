@@ -11,10 +11,11 @@
   ./development/nvim.nix
   ./desktop/gtk.nix
   ./system/utils.nix
-  ./applications/librewolf.nix
+  # ./applications/librewolf.nix
+  ./applications/firefox.nix
   ./applications/zed.nix
-  ./applications/youtube-music.nix
   ./applications/tldraw.nix
+  ./applications/strata.nix
   ];
 
   home.username="sh4dow";
@@ -28,6 +29,7 @@
       fd 
       fzf 
       herdr
+      udiskie
       glib
       btop
       neovim
@@ -51,7 +53,7 @@
       ffmpeg
       yt-dlp
       cava
-      nautilus
+      # pcmanfm
       fastfetch
       brightnessctl
       mpd
@@ -83,14 +85,13 @@
       surge-downloader
       jq
       opencode
-      firefox
       kitty
       imagemagick
-      librewolf
-      wine
+      firefox
       inputs.helium.packages.${pkgs.stdenv.hostPlatform.system}.default
       inputs.zennotes.packages.${pkgs.stdenv.hostPlatform.system}.zennotes-desktop
       inputs.limusic.packages.${pkgs.stdenv.hostPlatform.system}.default
+      inputs.strata.packages.${pkgs.stdenv.hostPlatform.system}.default
       inputs.opentubex.packages.${pkgs.stdenv.hostPlatform.system}.opentubex
   ];
   programs.home-manager.enable=true;
@@ -113,9 +114,9 @@
   xdg.mimeApps = {
     enable = true;
     defaultApplications = {
-      "text/html" = "helium.desktop";
-      "x-scheme-handler/http" = "helium.desktop";
-      "x-scheme-handler/https" = "helium.desktop";
+      "text/html" = "firefox.desktop";
+      "x-scheme-handler/http" = "firefox.desktop";
+      "x-scheme-handler/https" = "firefox.desktop";
 
       # PDF
       "application/pdf" = "org.pwmt.zathura.desktop";
@@ -131,7 +132,12 @@
       "text/markdown" = "mdfried.desktop";
 
       # File manager
-      "inode/directory" = "nautilus.desktop";
+      "inode/directory" = "io.github.lgse.Strata.desktop";
+      "x-scheme-handler/trash" = "io.github.lgse.Strata.desktop";
+
+      # terminal
+      "application/x-sh" = "Alacritty.desktop";
+      "application/x-shellscript" = "Alacritty.desktop";
 
       # Video
       "video/mp4" = "mpv.desktop";

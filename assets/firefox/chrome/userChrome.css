@@ -459,6 +459,16 @@ tracking-protection-icon-container,
   color: var(--sh4dow-fg) !important;
 }
 
+/* Sidebar launcher/tool buttons live in moz-button shadow DOM. These variables
+   inherit into the shadow tree, so they fix the mismatched button-strip color. */
+#sidebar-main {
+  --button-background-color: var(--sh4dow-bg) !important;
+  --button-background-color-hover: var(--sh4dow-magenta) !important;
+  --button-background-color-active: var(--sh4dow-accent-color) !important;
+  --button-background-color-ghost: transparent !important;
+  --button-text-color: var(--sh4dow-fg) !important;
+}
+
 .sidebar-splitter {
   background-color: var(--sh4dow-accent-color-inactive) !important;
   width: 1px !important;
@@ -476,4 +486,47 @@ tracking-protection-icon-container,
 #sidebar-button-1 {
   background-color: var(--sh4dow-magenta) !important;
   color: var(--sh4dow-bg) !important;
+}
+
+/*--------------------------*/
+/*    Auto-hide nav-bar     */
+/*--------------------------*/
+
+:root:not([sizemode="fullscreen"]):not([customizing]) {
+  --sh4dow-navbar-hide-height: calc(var(--urlbar-height, 32px) + 24px);
+  --sh4dow-navbar-reveal-strip-height: 2px;
+}
+
+/* Invisible top-edge hover strip, active only while the bar is hidden */
+:root:not([sizemode="fullscreen"]):not([customizing])
+  #navigator-toolbox::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  inset-inline: 0;
+  height: var(--sh4dow-navbar-reveal-strip-height);
+  z-index: 10;
+}
+
+:root:not([sizemode="fullscreen"]):not([customizing])
+  #navigator-toolbox:is(:hover, :focus-within)::before {
+  content: none;
+}
+
+:root:not([sizemode="fullscreen"]):not([customizing]) toolbar#nav-bar {
+  margin-top: calc(0px - var(--sh4dow-navbar-hide-height));
+  transition: margin-top 120ms ease-out;
+}
+
+:root:not([sizemode="fullscreen"]):not([customizing])
+  #navigator-toolbox:is(:hover, :focus-within)
+  toolbar#nav-bar,
+:root:not([sizemode="fullscreen"]):not([customizing]) #nav-bar:focus-within {
+  margin-top: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root:not([sizemode="fullscreen"]):not([customizing]) toolbar#nav-bar {
+    transition: none !important;
+  }
 }

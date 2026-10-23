@@ -234,10 +234,27 @@
           enable_builtin_templates = true;
           enable_community_templates = true;
 
-          user.librewolf = {
-            input_path = "/home/sh4dow/nixos-config/assets/templates/librewolf-colors.css";
-            output_path = "/home/sh4dow/.config/librewolf/librewolf/1g1xx0q6.default/chrome/Colors.css";
+        "nvim-base16" = {
+          input_path = "~/.config/nvim/lua/matugen-template.lua";
+          output_path = "~/.config/nvim/lua/matugen.lua";
+          post_hook = "pkill -SIGUSR1 nvim";
+        };
+        user.limusic = {
+            input_path = "/home/sh4dow/nixos-config/assets/templates/limusic.css";
+            output_path = "/home/sh4dow/.config/limusic/matugen.css";
+        };
+          user.firefox = {
+            input_path = "/home/sh4dow/nixos-config/assets/templates/firefox-colors.css";
+            output_path = "/home/sh4dow/.config/mozilla/firefox/fmroyqzj.default/chrome/Colors.css";
           };
+          user.strata = {
+            input_path = "/home/sh4dow/nixos-config/assets/templates/strata-theme.toml";
+            output_path = "/home/sh4dow/.config/strata/themes/noctalia.toml";
+          };
+          # user.librewolf = {
+          #   input_path = "/home/sh4dow/nixos-config/assets/templates/firefox-colors.css";
+          #   output_path = "/home/sh4dow/.config/librewolf/librewolf/1g1xx0q6.default/chrome/Colors.css";
+          # };
         };
       };
 
@@ -317,15 +334,6 @@
       };
 
       templates = {
-        "nvim-base16" = {
-          input_path = "~/.config/nvim/lua/matugen-template.lua";
-          output_path = "~/.config/nvim/lua/matugen.lua";
-          post_hook = "pkill -SIGUSR1 nvim";
-        };
-        user.limusic = {
-            input_path = "/home/sh4dow/nixos-config/assets/templates/limusic.css";
-            output_path = "/home/sh4dow/.config/limusic/matugen.css";
-        };
       };
     };
   };
