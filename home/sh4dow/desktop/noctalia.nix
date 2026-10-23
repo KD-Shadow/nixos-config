@@ -483,8 +483,6 @@
           builtin_ids = [ "alacritty" "btop" "gtk3" "gtk4" "ghostty" "kitty" "qt" "starship" ];
           community_ids = [
             "opencode"
-            "brave"
-            "zen-browser"
             "libreoffice"
             "neovim"
             "zed"
@@ -495,7 +493,6 @@
             "lazygit"
             "superfile"
             "surgedm"
-            "tmux"
           ];
           enable_builtin_templates = true;
           enable_community_templates = true;
@@ -505,8 +502,8 @@
               output_path = "/home/sh4dow/.config/mozilla/firefox/fmroyqzj.default/chrome/Colors.css";
             };
             limusic = {
-              input_path = "$XDG_CONFIG_HOME/noctalia/templates/limusic.css";
-              output_path = "$XDG_CONFIG_HOME/limusic/matugen.css";
+              input_path = "/home/sh4dow/nixos-config/assets/templates/limusic.css";
+              output_path = "home/sh4dow/.config/limusic/matugen.css";
             };
             strata = {
               input_path = "/home/sh4dow/nixos-config/assets/templates/strata-theme.toml";

@@ -57,4 +57,8 @@ vim.opt.splitkeep = "cursor"
 -- Add asterisks in block comments
 vim.opt.formatoptions:append({ "r" })
 
-vim.g.lazyvim_colorscheme = "none"
+if vim.fn.exists("&winborder") == 1 then
+  vim.opt.winborder = "rounded"
+end
+vim.opt.pumblend = 0
+vim.opt.winblend = 0

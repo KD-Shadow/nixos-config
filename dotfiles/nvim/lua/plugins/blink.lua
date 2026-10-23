@@ -1,10 +1,34 @@
 return {
   "saghen/blink.cmp",
   opts = {
+    signature = {
+      window = {
+        border = "rounded",
+      },
+    },
     keymap = {
       preset = "default",
-      ["<S-Tab>"] = { "select_prev", "snippet_backward", "fallback" },
-      ["<Tab>"] = { "select_next", "snippet_forward", "fallback" },
+      ["<S-Tab>"] = {
+        "snippet_backward",
+        function(cmp)
+          if cmp.is_visible() then
+            return cmp.select_prev()
+          end
+        end,
+        "fallback",
+      },
+      ["<Tab>"] = {
+        "snippet_forward",
+        function(cmp)
+          if cmp.is_visible() then
+            return cmp.select_next()
+          end
+          if cmp.is_active() then
+            return cmp.show_and_insert()
+          end
+        end,
+        "fallback",
+      },
       ["<CR>"] = { "accept", "fallback" },
       ["<C-space>"] = { "show", "show_documentation", "hide_documentation" },
       ["<C-e>"] = { "hide", "fallback" },
@@ -14,6 +38,9 @@ return {
       ["<C-n>"] = { "select_next", "fallback" },
     },
     completion = {
+      trigger = {
+        show_in_snippet = false,
+      },
       keyword = {
         range = "full",
       },

@@ -87,9 +87,10 @@
       opencode
       kitty
       imagemagick
+      obsidian
       firefox
+      bubblewrap
       inputs.helium.packages.${pkgs.stdenv.hostPlatform.system}.default
-      inputs.zennotes.packages.${pkgs.stdenv.hostPlatform.system}.zennotes-desktop
       inputs.limusic.packages.${pkgs.stdenv.hostPlatform.system}.default
       inputs.strata.packages.${pkgs.stdenv.hostPlatform.system}.default
       inputs.opentubex.packages.${pkgs.stdenv.hostPlatform.system}.opentubex

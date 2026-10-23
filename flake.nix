@@ -39,7 +39,6 @@
       url = "github:AlvaroParker/helium-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    zennotes.url = "github:ZenNotes/zennotes";
     limusic.url = "path:./apps/limusic";
     strata.url = "path:./apps/strata";
     # umbriel.url = "github:noctalia-dev/umbriel";
@@ -99,3 +98,5 @@
     };
   };
 }
+
+:
