@@ -103,6 +103,7 @@
   programs.fish.enable = true;
   services.power-profiles-daemon.enable = true;
   services.udisks2.enable = true;
+  services.gvfs.enable = true;
   programs.dconf.enable = true;
   programs.nix-ld.enable = true;
   virtualisation.docker.enable = true;

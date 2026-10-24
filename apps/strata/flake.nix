@@ -43,8 +43,27 @@
             gtksourceview5 fontconfig stdenv.cc.cc.lib
             gst_all_1.gstreamer gst_all_1.gst-plugins-base gst_all_1.gst-plugins-good
             glib-networking gvfs xdg-utils
+            libpng libjpeg_turbo librsvg libwebp
+            util-linux
+            shared-mime-info
+            hicolor-icon-theme
+            gdk-pixbuf
+            librsvg
+            libavif
+            libjxl
+            webp-pixbuf-loader
+            libheif
+            ffmpeg
+            ffmpeg           
+            ffmpegthumbnailer
+            squashfsTools   
           ];
           runScript = "bash";
+          extraBuildCommands = ''
+            mkdir -p $out/usr/lib64/gdk-pixbuf-2.0/2.10.0
+            GDK_PIXBUF_MODULEDIR=${pkgs.gdk-pixbuf}/lib/gdk-pixbuf-2.0/2.10.0/loaders ${pkgs.gdk-pixbuf.dev}/bin/gdk-pixbuf-query-loaders 2>/dev/null | ${pkgs.gnused}/bin/sed "s|${pkgs.gdk-pixbuf}/lib|/usr/lib64|g" > $out/usr/lib64/gdk-pixbuf-2.0/2.10.0/loaders.cache.tmp
+            mv $out/usr/lib64/gdk-pixbuf-2.0/2.10.0/loaders.cache.tmp $out/usr/lib64/gdk-pixbuf-2.0/2.10.0/loaders.cache
+          '';
         };
       in
       {
@@ -58,7 +77,7 @@
               cat > $out/bin/strata << SCRIPT
 #!/usr/bin/env bash
 export XDG_DATA_DIRS=${strataSrc}/share:\''${XDG_DATA_DIRS:-/run/current-system/sw/share}
-exec ${fhs}/bin/strata-fhs -c "cd /home/sh4dow && ${strataSrc}/strata \"\$@\"" _ "\$@"
+exec ${fhs}/bin/strata-fhs -c "cd /home/sh4dow && STRATA_SANDBOX_ROOT=/nix/store ${strataSrc}/strata \"\$@\"" _ "\$@"
 SCRIPT
               chmod +x $out/bin/strata
               install -Dm644 ${strataSrc}/io.github.lgse.Strata.desktop $out/share/applications/io.github.lgse.Strata.desktop
