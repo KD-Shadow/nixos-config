@@ -12,7 +12,7 @@
         Sh4dow = {
           background_opacity = 0.9;
           border = "on_primary";
-          center = [ "clock", "theme-switcher" ];
+          center = [ "clock" "theme-switcher" ];
           enabled = true;
           end = [ "media" "tray" "cpu" "notifications" "network" "volume" "battery" ];
           font_family = "JetBrainsMono NFM";
