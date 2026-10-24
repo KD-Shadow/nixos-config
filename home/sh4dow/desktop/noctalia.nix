@@ -425,7 +425,7 @@
       };
       shell = {
         app_icon_colorize = false;
-        avatar_path = "${config.home.homeDirectory}/Pictures/Pics/anime(cat,girl).jpg";
+        avatar_path = "${config.home.homeDirectory}/nixos-config/assets/Pics/anime(cat,girl).jpg";
         button_borders = false;
         card_borders = false;
         corner_radius_scale = 2.0;
@@ -436,6 +436,7 @@
         popup_borders = false;
         settings_show_advanced = true;
         show_location = false;
+        time_format = "{:%I:%M %p}";
         launcher = {
           width = 560;
         };
