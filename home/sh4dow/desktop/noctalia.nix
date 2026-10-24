@@ -410,7 +410,7 @@
           "notoxus/media-island"
           "aristides/udiskie"
           "alexmnrs/github-activity"
-          "theblackdon/theme-switcher",
+          "theblackdon/theme-switcher"
         ];
         source = [
           {
