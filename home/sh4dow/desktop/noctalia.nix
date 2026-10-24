@@ -1,4 +1,4 @@
-{ ... }:
+{ config, ... }:
 
 {
   programs.noctalia = {
@@ -98,17 +98,6 @@
           visible = true;
         };
         widget = {
-          "desktop-widget-0000000000000001" = {
-            box_height = 0.0;
-            box_width = 0.0;
-            cx = 281.5;
-            cy = 417.5;
-            output = "eDP-1";
-            placement_height = 768.0;
-            placement_width = 1366.0;
-            rotation = 0.0;
-            type = "tausif/ncs-visualizer:orb";
-          };
           "desktop-widget-0000000000000002" = {
             box_height = 144.0;
             box_width = 320.0;
@@ -316,7 +305,7 @@
             type = "sticker";
             settings = {
               background = false;
-              image_path = "/home/sh4dow/Pictures/fc6ed898-5da2-4459-b0f8-87d04e45b5da-removebg-preview.png";
+              image_path = "${config.home.homeDirectory}/Pictures/fc6ed898-5da2-4459-b0f8-87d04e45b5da-removebg-preview.png";
               opacity = 1.0;
             };
           };
@@ -367,7 +356,7 @@
             type = "sticker";
             settings = {
               background = false;
-              image_path = "/home/sh4dow/Pictures/fc6ed898-5da2-4459-b0f8-87d04e45b5da-removebg-preview.png";
+              image_path = "${config.home.homeDirectory}/Pictures/fc6ed898-5da2-4459-b0f8-87d04e45b5da-removebg-preview.png";
               opacity = 1.0;
             };
           };
@@ -403,15 +392,9 @@
           hub_layer = "overlay";
           hub_position = "bottom_center";
         };
-        "kenn/keybind-cheatsheet" = {
-          mango_config = "/home/sh4dow/.config/mango/mango-config/bind.conf";
-        };
-        "m4sc/profile-switcher" = {
-          panel_placement = "attached";
-        };
         "noctalia/wallhaven" = {
           browser_open_near_click = true;
-          download_dir = "/home/sh4dow/nixos-config/assets/wallpapers";
+          download_dir = "${config.home.homeDirectory}/nixos-config/assets/wallpapers";
         };
         "notoxus/media-island" = {
           auto_show = false;
@@ -426,9 +409,6 @@
           "notoxus/media-island"
           "aristides/udiskie"
           "alexmnrs/github-activity"
-          "tausif/ncs-visualizer"
-          "kenn/keybind-cheatsheet"
-          "m4sc/profile-switcher"
         ];
         source = [
           {
@@ -445,7 +425,7 @@
       };
       shell = {
         app_icon_colorize = false;
-        avatar_path = "/home/sh4dow/Pictures/Pics/anime(cat,girl).jpg";
+        avatar_path = "${config.home.homeDirectory}/Pictures/Pics/anime(cat,girl).jpg";
         button_borders = false;
         card_borders = false;
         corner_radius_scale = 2.0;
@@ -498,41 +478,41 @@
           enable_community_templates = true;
           user = {
             firefox = {
-              input_path = "/home/sh4dow/nixos-config/assets/templates/firefox-colors.css";
-              output_path = "/home/sh4dow/.config/mozilla/firefox/fmroyqzj.default/chrome/Colors.css";
+              input_path = "${config.home.homeDirectory}/nixos-config/assets/templates/firefox-colors.css";
+              output_path = "${config.home.homeDirectory}/.config/mozilla/firefox/sh4dow/chrome/Colors.css";
             };
             limusic = {
-              input_path = "/home/sh4dow/nixos-config/assets/templates/limusic.css";
-              output_path = "home/sh4dow/.config/limusic/matugen.css";
+              input_path = "${config.home.homeDirectory}/nixos-config/assets/templates/limusic.css";
+              output_path = "${config.home.homeDirectory}/.config/limusic/matugen.css";
             };
             strata = {
-              input_path = "/home/sh4dow/nixos-config/assets/templates/strata-theme.toml";
-              output_path = "/home/sh4dow/.config/strata/themes/noctalia.toml";
+              input_path = "${config.home.homeDirectory}/nixos-config/assets/templates/strata-theme.toml";
+              output_path = "${config.home.homeDirectory}/.config/strata/themes/noctalia.toml";
             };
             "nvim-base16" = {
-              input_path = "~/.config/nvim/lua/matugen-template.lua";
-              output_path = "~/.config/nvim/lua/matugen.lua";
+              input_path = "${config.home.homeDirectory}/.config/nvim/lua/matugen-template.lua";
+              output_path = "${config.home.homeDirectory}/.config/nvim/lua/matugen.lua";
               post_hook = "pkill -SIGUSR1 nvim";
             };
           };
         };
       };
       wallpaper = {
-        directory = "/home/sh4dow/nixos-config/assets/wallpapers";
+        directory = "${config.home.homeDirectory}/nixos-config/assets/wallpapers";
         transition_on_startup = true;
         automation = {
           enabled = false;
           interval_seconds = 300;
         };
         default = {
-          path = "/home/sh4dow/nixos-config/assets/wallpapers/wallhaven-wqw1wx.jpg";
+          path = "${config.home.homeDirectory}/nixos-config/assets/wallpapers/wallhaven-wqw1wx.jpg";
         };
         last = {
-          path = "/home/sh4dow/nixos-config/assets/wallpapers/wallhaven-wqw1wx.jpg";
+          path = "${config.home.homeDirectory}/nixos-config/assets/wallpapers/wallhaven-wqw1wx.jpg";
         };
         monitors = {
           "eDP-1" = {
-            path = "/home/sh4dow/nixos-config/assets/wallpapers/wallhaven-wqw1wx.jpg";
+            path = "${config.home.homeDirectory}/nixos-config/assets/wallpapers/wallhaven-wqw1wx.jpg";
           };
         };
       };
@@ -551,6 +531,10 @@
         };
         clock = {
           format = "{:%I:%M %p}";
+        };
+        cpu = {
+          type = "sysmon";
+          stat = "cpu_usage";
         };
         media = {
           album_art_only = true;

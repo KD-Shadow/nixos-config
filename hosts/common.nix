@@ -123,7 +123,6 @@
     curl
     wget
     efibootmgr
-    uv
     xdg-utils
    (pkgs.python3.withPackages (ps: [
       ps.numpy

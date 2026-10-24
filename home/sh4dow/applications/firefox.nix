@@ -1,28 +1,29 @@
-let
-  profile = "/home/sh4dow/.config/mozilla/firefox/fmroyqzj.default";
-  chrome = ../../../assets/firefox/chrome;
-in
+{ config, pkgs, ... }:
+
 {
-  home.file = {
-    "${profile}/chrome/userChrome.css" = {
-      source = "${chrome}/userChrome.css";
-      force = true;
+  programs.firefox = {
+    enable = true;
+    package = pkgs.firefox;
+    configPath = "${config.xdg.configHome}/mozilla/firefox";
+
+    profiles.sh4dow = {
+      id = 0;
+      name = "sh4dow";
+      path = "sh4dow";
+      isDefault = true;
+
+      extraConfig = builtins.readFile ../../../assets/firefox/user.js;
+
+      userChrome = builtins.readFile ../../../assets/firefox/chrome/userChrome.css;
+      userContent = builtins.readFile ../../../assets/firefox/chrome/userContent.css;
     };
-    "${profile}/chrome/userContent.css" = {
-      source = "${chrome}/userContent.css";
-      force = true;
-    };
-    "${profile}/chrome/add.svg" = {
-      source = "${chrome}/add.svg";
-      force = true;
-    };
-    "${profile}/chrome/addd.svg" = {
-      source = "${chrome}/addd.svg";
-      force = true;
-    };
-    "${profile}/user.js" = {
-      source = ../../../assets/firefox/user.js;
-      force = true;
-    };
+  };
+
+  xdg.configFile = {
+    "mozilla/firefox/sh4dow/chrome/add.svg".source =
+      ../../../assets/firefox/chrome/add.svg;
+
+    "mozilla/firefox/sh4dow/chrome/addd.svg".source =
+      ../../../assets/firefox/chrome/addd.svg;
   };
 }

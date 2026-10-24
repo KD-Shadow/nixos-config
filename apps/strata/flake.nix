@@ -39,7 +39,7 @@
         fhs = pkgs.buildFHSEnv {
           name = "strata-fhs";
           targetPkgs = pkgs: with pkgs; [
-            gtk4 pango gdk-pixbuf cairo graphene glib poppler
+            bubblewrap gtk4 pango gdk-pixbuf cairo graphene glib poppler
             gtksourceview5 fontconfig stdenv.cc.cc.lib
             gst_all_1.gstreamer gst_all_1.gst-plugins-base gst_all_1.gst-plugins-good
             glib-networking gvfs xdg-utils
@@ -58,7 +58,7 @@
               cat > $out/bin/strata << SCRIPT
 #!/usr/bin/env bash
 export XDG_DATA_DIRS=${strataSrc}/share:\''${XDG_DATA_DIRS:-/run/current-system/sw/share}
-exec ${fhs}/bin/strata-fhs -c "cd ${strataSrc} && ./strata \"\$@\"" _ "\$@"
+exec ${fhs}/bin/strata-fhs -c "cd /home/sh4dow && ${strataSrc}/strata \"\$@\"" _ "\$@"
 SCRIPT
               chmod +x $out/bin/strata
               install -Dm644 ${strataSrc}/io.github.lgse.Strata.desktop $out/share/applications/io.github.lgse.Strata.desktop

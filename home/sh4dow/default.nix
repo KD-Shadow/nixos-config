@@ -7,7 +7,6 @@
   ./desktop/mango.nix
   ./terminal/terminals.nix
   ./desktop/fonts.nix
-  ./development/tmux.nix
   ./development/nvim.nix
   ./desktop/gtk.nix
   ./system/utils.nix
@@ -34,6 +33,7 @@
       btop
       neovim
       bat
+      rustup
       nodejs
       power-profiles-daemon
       lua
@@ -41,7 +41,6 @@
       luarocks
       gcc
       mdfried
-      rustup
       tmux
       eza
       zip 
@@ -88,7 +87,6 @@
       kitty
       imagemagick
       obsidian
-      firefox
       bubblewrap
       inputs.helium.packages.${pkgs.stdenv.hostPlatform.system}.default
       inputs.limusic.packages.${pkgs.stdenv.hostPlatform.system}.default
