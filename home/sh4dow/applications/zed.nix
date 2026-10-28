@@ -69,7 +69,7 @@
       theme = {
         mode = "dark";
         light = "One Light";
-        dark = "Noctalia Dark Transparent";
+        dark = "Noctalia Dark";
       };
 
       theme_overrides = {

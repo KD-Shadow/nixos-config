@@ -72,30 +72,6 @@
       }
       ];
     };
-
-    nixosConfigurations.sh4dow-secondary = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      specialArgs = { inherit inputs; };
-      modules = [
-      ./hosts/sh4dow-secondary/configuration.nix
-      home-manager.nixosModules.home-manager
-      chaotic.nixosModules.default
-      {
-        home-manager = {
-          useGlobalPkgs = true;
-          useUserPackages = true;
-          extraSpecialArgs = { inherit inputs; };
-          users.sh4dow = {
-            imports = [
-              # inputs.umbriel.homeModules.default
-              ./home/sh4dow
-            ];
-          };
-          backupFileExtension = "backup";
-        };
-      }
-      ];
-    };
   };
 }
 

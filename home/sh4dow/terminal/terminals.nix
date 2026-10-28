@@ -81,7 +81,6 @@
       confirm-close-surface = false;
 
       scrollbar = "never";
-
       theme = "noctalia";
     };
   };

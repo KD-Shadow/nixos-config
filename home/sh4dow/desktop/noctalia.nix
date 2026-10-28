@@ -387,6 +387,11 @@
         offset_x = 17;
         scale = 0.75;
       };
+      osd = {
+        orientation = "vertical";
+        position_vertical = "center_right";
+        scale = 0.7;
+      };
       plugin_settings = {
         "ashur-d/wallpaper-widget" = {
           close_on_apply = true;

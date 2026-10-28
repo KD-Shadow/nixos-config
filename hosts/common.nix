@@ -14,7 +14,6 @@
 
     # Enable "Silent boot"
     consoleLogLevel = 3;
-    initrd.verbose = false;
     kernelParams = [
       "quiet"
       "rd.udev.log_level=3"
@@ -123,6 +122,7 @@
     git
     curl
     wget
+    uv
     efibootmgr
     xdg-utils
    (pkgs.python3.withPackages (ps: [

@@ -16,13 +16,13 @@
         pkgs = import nixpkgs { inherit system; };
 
         strataTarball = pkgs.fetchurl {
-          url = "https://github.com/lgse/strata/releases/download/v1.1.0/strata-1.1.0-x86_64-unknown-linux-gnu.tar.gz";
-          hash = "sha256-yyknz7+F6v7x+qUxYwPfnOUYMcejcCBPigaL2DxpB5M=";
+          url = "https://github.com/lgse/strata/releases/download/v1.1.1/strata-1.1.1-x86_64-unknown-linux-gnu.tar.gz";
+          hash = "sha256-4FUuB3L83tE6gohHR7KPCzIiCjKTHNpuVfg1dbvlBzQ=";
         };
 
         strataSrc = pkgs.stdenv.mkDerivation {
           pname = "strata-src";
-          version = "1.1.0";
+          version = "1.1.1";
 
           src = strataTarball;
 
@@ -32,7 +32,7 @@
 
           installPhase = ''
             mkdir -p $out
-            cp -r strata-1.1.0-x86_64-unknown-linux-gnu/* $out/
+            cp -r strata-1.1.1-x86_64-unknown-linux-gnu/* $out/
           '';
         };
 
@@ -70,7 +70,7 @@
         packages = rec {
           strata = pkgs.stdenv.mkDerivation {
             pname = "strata";
-            version = "1.1.0";
+            version = "1.1.1";
             dontUnpack = true;
             installPhase = ''
               mkdir -p $out/bin $out/share/applications $out/share/icons/hicolor/scalable/apps
