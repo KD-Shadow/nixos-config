@@ -6,9 +6,9 @@
   ];
 
   home.packages = with pkgs;[
-      niri
       quickshell
       awww
+      matugen
       slurp
       grim
       zenity

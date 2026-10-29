@@ -1,4 +1,3 @@
-
 { pkgs, ... }:
 
 let
@@ -12,6 +11,7 @@ in
     ../common.nix
   ];
 
+  programs.niri.enable = true;
   environment.systemPackages = with pkgs; [
     sddm-astronaut
   ];
@@ -29,10 +29,11 @@ in
       kdePackages.qtmultimedia
     ];
   };
-
+  xdg.portal.config.niri."org.freedesktop.impl.portal.FileChooser" = [ "strata" "gtk" ];
   hardware.bluetooth.enable = true;
   services.upower.enable = true;
 
+  sh4dow.themeBackend = "matugen";
   networking.hostName = "sh4dow-niri";
   system.stateVersion = "26.11";
 }
