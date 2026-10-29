@@ -94,6 +94,7 @@
 
     settings = {
       cursor_shape = "block";
+      cursor_trail = 3;
       sync_to_monitor = "yes";
       repaint_delay = 8;
       input_delay = 0;

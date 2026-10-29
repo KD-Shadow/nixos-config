@@ -15,4 +15,8 @@ return {
   { "yorumicolors/yorumi.nvim", enabled = false },
   { "rose-pine/neovim", name = "rose-pine", enabled = false },
   { "tiagovla/tokyodark.nvim", enabled = false },
+  {
+    "nvim-lualine/lualine.nvim",
+    enabled = false,
+  },
 }

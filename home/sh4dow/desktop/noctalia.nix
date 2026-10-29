@@ -89,9 +89,8 @@
       desktop_widgets = {
         schema_version = 2;
         widget_order = [
-          "desktop-widget-0000000000000001"
           "desktop-widget-0000000000000002"
-          "desktop-widget-0000000000000003"
+          "desktop-widget-0000000000000004"
         ];
         grid = {
           cell_size = 16;
@@ -118,26 +117,25 @@
               shadow = true;
             };
           };
-          "desktop-widget-0000000000000003" = {
-            box_height = 0.0;
-            box_width = 0.0;
-            cx = 171.0;
-            cy = 622.5;
+          "desktop-widget-0000000000000004" = {
+            box_height = 160.0;
+            box_width = 1376.0;
+            cx = 683.0;
+            cy = 688.0;
             output = "eDP-1";
             placement_height = 768.0;
             placement_width = 1366.0;
             rotation = 0.0;
-            type = "fancy_audio_visualizer";
+            type = "audio_visualizer";
             settings = {
               background = false;
-              bar_width = 1.0;
-              bloom_intensity = 0.65;
-              inner_diameter = 1.0;
-              primary_color = "primary";
-              ring_opacity = 1.0;
-              rotation_speed = 1.3;
-              sensitivity = 3.0;
-              visualization_mode = "bars_rings";
+              bands = 128;
+              centered = false;
+              color_1 = "on_error";
+              color_2 = "hover";
+              mirrored = true;
+              reversed = false;
+              show_when_idle = true;
             };
           };
         };
