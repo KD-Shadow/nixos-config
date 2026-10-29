@@ -1,0 +1,47 @@
+// gtk settings
+window-rule {
+    match app-id="^nwg-look$"
+    open-floating true
+}
+// File Manager
+window-rule {
+    match app-id="pcmanfm"
+    open-maximized true
+}
+
+// zed editor
+window-rule {
+    match app-id="^dev.zed.Zed$"
+    open-maximized true
+    opacity 0.8
+    background-effect {
+      blur true
+      noise 0.05
+      saturation 2
+    }
+}
+
+// zathura 
+window-rule {
+  match app-id="org.pwmt.zathura"
+  open-maximized true
+}
+
+// neovide
+window-rule {
+    match app-id="neovide"
+    open-maximized true
+}
+
+//brave
+window-rule {
+    match app-id="^helium$"
+    open-maximized true
+    opacity 0.95
+}
+
+//strata
+window-rule {
+  match app-id="io.github.lgse.Strata"
+  open-floating true
+}

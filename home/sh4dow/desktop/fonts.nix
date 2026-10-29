@@ -10,7 +10,6 @@
     nerd-fonts.meslo-lg
 
     liberation_ttf
-    open-sans
 
     adwaita-fonts
     cantarell-fonts
