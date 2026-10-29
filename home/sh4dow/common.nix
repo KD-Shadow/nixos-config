@@ -85,12 +85,11 @@
       opencode
       kitty
       imagemagick
-      obsidian
       bubblewrap
-      inputs.helium.packages.${pkgs.stdenv.hostPlatform.system}.default
+      #inputs.helium.packages.${pkgs.stdenv.hostPlatform.system}.default
       inputs.limusic.packages.${pkgs.stdenv.hostPlatform.system}.default
       inputs.strata.packages.${pkgs.stdenv.hostPlatform.system}.default
-      inputs.opentubex.packages.${pkgs.stdenv.hostPlatform.system}.opentubex
+      #inputs.opentubex.packages.${pkgs.stdenv.hostPlatform.system}.opentubex
   ];
   programs.home-manager.enable=true;
   #session variables
