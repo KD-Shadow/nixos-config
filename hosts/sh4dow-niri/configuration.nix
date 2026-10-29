@@ -33,7 +33,6 @@ in
   hardware.bluetooth.enable = true;
   services.upower.enable = true;
 
-  sh4dow.themeBackend = "matugen";
   networking.hostName = "sh4dow-niri";
   system.stateVersion = "26.11";
 }

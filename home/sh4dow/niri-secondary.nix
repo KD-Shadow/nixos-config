@@ -3,7 +3,10 @@
   ./common.nix
   ../sh4dow/desktop/niri.nix
   ../sh4dow/desktop/matugen.nix
+  ./terminal/terminals.nix
   ];
+
+  sh4dow.themeBackend = "matugen";
 
   home.packages = with pkgs;[
       quickshell

@@ -3,7 +3,6 @@
   ./development/git.nix
   ./terminal/shell.nix
   ./development/ssh.nix
-  ./terminal/terminals.nix
   ./desktop/fonts.nix
   ./development/nvim.nix
   ./development/herdr.nix
