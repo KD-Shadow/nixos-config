@@ -40,3 +40,7 @@ output_path = '~/.config/limusic/matugen.css'
 [templates.strata]
 input_path = './templates/strata-theme.toml'
 output_path = '~/.config/strata/themes/matugen.toml'
+
+[templates.firefox]
+input_path = './templates/firefox-colors.css'
+output_path = '~/.config/mozilla/firefox/sh4dow/chrome/Colors.css'

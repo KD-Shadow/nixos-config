@@ -1,0 +1,14 @@
+:root {
+    --sh4dow-bg: {{ colors.surface.default.hex }};
+    --sh4dow-fg: {{ colors.on_surface.default.hex }};
+    --sh4dow-accent-color: {{ colors.primary.default.hex }};
+    --sh4dow-accent-color-inactive: {{ colors.surface_container.default.hex }};
+    --sh4dow-black: {{ colors.surface_container_lowest.default.hex }};
+    --sh4dow-red: {{ colors.error.default.hex }};
+    --sh4dow-green: {{ colors.secondary.default.hex }};
+    --sh4dow-yellow: {{ colors.tertiary.default.hex }};
+    --sh4dow-blue: {{ colors.secondary.default.hex }};
+    --sh4dow-magenta: {{ colors.primary.default.hex }};
+    --sh4dow-cyan: {{ colors.tertiary.default.hex }};
+    --sh4dow-white: {{ colors.on_surface_variant.default.hex }};
+}

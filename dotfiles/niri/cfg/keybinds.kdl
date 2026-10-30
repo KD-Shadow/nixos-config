@@ -11,6 +11,9 @@ binds {
     Mod+M { spawn-sh "qs -p $HOME/.local/share/quickshell/ukishima ipc call ukishima media \"\""; }
     Mod+Shift+C { spawn-sh "qs -p $HOME/.local/share/quickshell/ukishima ipc call ukishima calendar \"\""; }
     Mod+Shift+T { spawn-sh "qs -p $HOME/.local/share/quickshell/ukishima ipc call ukishima scratch \"\""; }
+    Mod+E { spawn "strata"; }
+    Mod+ALT+Ctrl+P { spawn-sh "systemctl poweroff"; }
+    Mod+ALT+Ctrl+R { spawn-sh "systemctl reboot"; }
 
 
     // === System & Overview ===
@@ -27,7 +30,7 @@ binds {
   //   spawn "neovide"
   // }
   Mod+B hotkey-overlay-title="Open helium-browser" {
-    spawn "helium-browser"
+    spawn "firefox"
     }
     // === Window Management ===
     Mod+Q repeat=false { close-window; }

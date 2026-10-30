@@ -116,7 +116,7 @@
 
       extraConfig =
         if config.sh4dow.themeBackend == "matugen" then
-          "include themes/Matugen.conf"
+          "include Matugen.conf"
         else
           "include themes/noctalia.conf";
     };

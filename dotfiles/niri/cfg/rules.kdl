@@ -35,13 +35,18 @@ window-rule {
 
 //brave
 window-rule {
-    match app-id="^helium$"
+    match app-id="^firefox$"
     open-maximized true
     opacity 0.95
 }
 
 //strata
+// window-rule {
+//   match app-id="io.github.lgse.Strata"
+//   open-floating true
+// }
+
 window-rule {
-  match app-id="io.github.lgse.Strata"
+  match app-id="limusic"
   open-floating true
 }

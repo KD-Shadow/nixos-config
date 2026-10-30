@@ -12,7 +12,6 @@
   ./applications/firefox.nix
   ./applications/zed.nix
   ./applications/tldraw.nix
-  ./applications/strata.nix
   ];
 
   home.username="sh4dow";

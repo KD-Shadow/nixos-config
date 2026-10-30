@@ -4,6 +4,7 @@
   ./desktop/noctalia.nix
   ./desktop/mango.nix
   ./terminal/terminals.nix
+  ./applications/strata.nix
   ];
 
   sh4dow.themeBackend = "noctalia";
