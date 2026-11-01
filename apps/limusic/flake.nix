@@ -46,6 +46,7 @@
 
           extraPkgs = pkgs: with pkgs; [
             alsa-lib
+            libgpg-error
           ];
 
           extraInstallCommands = ''

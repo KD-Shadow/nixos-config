@@ -28,7 +28,7 @@ html.matugen-theme {
 	--secondary-foreground: {{colors.on_secondary_container.light.hex}};
 
 	--muted: {{colors.surface_container_low.light.hex}};
-	--muted-foreground: {{colors.on_surface_variant.light.hex}};
+	--muted-foreground: {{colors.on_surface_container.light.hex}};
 
 	--destructive: {{colors.error.light.hex}};
 	--destructive-foreground: {{colors.on_error.light.hex}};
@@ -72,7 +72,7 @@ html.matugen-theme.dark {
 	--secondary-foreground: {{colors.on_secondary_container.dark.hex}};
 
 	--muted: {{colors.surface_container_low.dark.hex}};
-	--muted-foreground: {{colors.on_surface_variant.dark.hex}};
+	--muted-foreground: {{colors.on_surface_container.dark.hex}};
 
 	--destructive: {{colors.error.dark.hex}};
 	--destructive-foreground: {{colors.on_error.dark.hex}};

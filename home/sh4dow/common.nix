@@ -31,6 +31,7 @@
       neovim
       bat
       rustup
+      actionlint
       nodejs
       power-profiles-daemon
       lua
@@ -39,6 +40,8 @@
       gcc
       mdfried
       tmux
+      smassh
+      chatgpt
       eza
       zip 
       unzip
@@ -87,7 +90,6 @@
       #inputs.helium.packages.${pkgs.stdenv.hostPlatform.system}.default
       inputs.limusic.packages.${pkgs.stdenv.hostPlatform.system}.default
       inputs.strata.packages.${pkgs.stdenv.hostPlatform.system}.default
-      #inputs.opentubex.packages.${pkgs.stdenv.hostPlatform.system}.opentubex
   ];
   programs.home-manager.enable=true;
   #session variables

@@ -10,5 +10,5 @@
     --sh4dow-blue: {{ colors.secondary.default.hex }};
     --sh4dow-magenta: {{ colors.primary.default.hex }};
     --sh4dow-cyan: {{ colors.tertiary.default.hex }};
-    --sh4dow-white: {{ colors.on_surface_variant.default.hex }};
+    --sh4dow-white: {{ colors.on_surface_container.default.hex }};
 }

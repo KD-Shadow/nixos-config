@@ -264,12 +264,18 @@
 
     interactiveShellInit = ''
       # Fish
+
       set -g fish_greeting ""
 
       set fish_cursor_default block
       set fish_cursor_insert block
       set fish_cursor_replace_one underscore
       set fish_cursor_visual block
+
+      if not set -q HERDR_ENV; and isatty stdout
+          set boot_id (cat /proc/sys/kernel/random/boot_id)
+          exec herdr --session "boot-$boot_id"
+      end
 
       # History
       set -g fish_history_max 100000

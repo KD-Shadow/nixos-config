@@ -12,7 +12,7 @@
         Sh4dow = {
           background_opacity = 0.9;
           border = "on_primary";
-          center = [ "clock" "theme-switcher" ];
+          center = [ "activity_2" "clock" "bar" ];
           enabled = true;
           end = [ "media" "tray" "cpu" "notifications" "network" "volume" "battery" ];
           font_family = "JetBrainsMono NFM";
@@ -55,7 +55,7 @@
               accordion_direction = "end";
               border_width = 1.0;
               enabled = true;
-              fill = "surface_variant";
+              fill = "surface_container";
               id = "g1";
               members = [ "media" "tray" "notifications" "network" "volume" "battery" ];
               opacity = 1.0;
@@ -67,7 +67,7 @@
               accordion_direction = "end";
               border_width = 1.0;
               enabled = true;
-              fill = "surface_variant";
+              fill = "surface_container";
               id = "g2";
               members = [ "workspaces" "audio_visualizer" "cat" ];
               opacity = 1.0;
@@ -89,7 +89,6 @@
       desktop_widgets = {
         schema_version = 2;
         widget_order = [
-          "desktop-widget-0000000000000002"
           "desktop-widget-0000000000000004"
         ];
         grid = {
@@ -98,25 +97,6 @@
           visible = true;
         };
         widget = {
-          "desktop-widget-0000000000000002" = {
-            box_height = 144.0;
-            box_width = 320.0;
-            cx = 160.0;
-            cy = 88.0;
-            output = "eDP-1";
-            placement_height = 768.0;
-            placement_width = 1366.0;
-            rotation = 0.0;
-            type = "clock";
-            settings = {
-              background = false;
-              center_text = true;
-              clock_style = "digital";
-              font_family = "";
-              format = "{:%I:%M %p}";
-              shadow = true;
-            };
-          };
           "desktop-widget-0000000000000004" = {
             box_height = 160.0;
             box_width = 1376.0;
@@ -224,7 +204,7 @@
             rotation = 0.0;
             type = "login_box";
             settings = {
-              background_color = "surface_variant";
+              background_color = "surface_container";
               background_opacity = 0.88;
               background_radius = 12.0;
               center_password_text = true;
@@ -340,7 +320,7 @@
             rotation = 0.0;
             type = "volume";
             settings = {
-              background_color = "outline";
+              background_color = "outline_variant";
             };
           };
           "lockscreen-widget-0000000000000008" = {
@@ -414,6 +394,7 @@
           "aristides/udiskie"
           "alexmnrs/github-activity"
           "theblackdon/theme-switcher"
+          "hy4ri/herdr"
         ];
         source = [
           {

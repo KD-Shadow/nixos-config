@@ -29,7 +29,6 @@
     limusic.url = "path:./apps/limusic";
     strata.url = "path:./apps/strata";
     # umbriel.url = "github:noctalia-dev/umbriel";
-    opentubex.url = "github:OpenTubeX/nix";
   };
 
 
