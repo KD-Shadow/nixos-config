@@ -3,6 +3,7 @@
 {
   programs.noctalia = {
     enable = true;
+    systemd.enable = true;
     settings = {
       accessibility = {
         ui_scale = 0.95;
@@ -14,7 +15,7 @@
           border = "on_primary";
           center = [ "activity_2" "clock" "bar" ];
           enabled = true;
-          end = [ "media" "tray" "cpu" "notifications" "network" "volume" "battery" ];
+          end = [ "media" "tray" "cpu" "notifications" "network" "volume" "widget" ];
           font_family = "JetBrainsMono NFM";
           margin_edge = 0;
           margin_ends = 0;
@@ -27,7 +28,7 @@
           reserve_space = false;
           scale = 0.75;
           smart_auto_hide = true;
-          start = [ "workspaces" "audio_visualizer" "cat_2" ];
+          start = [ "workspaces" "audio_visualizer" "cat_2" "media" ];
           widget_spacing = 11;
         };
         default = {
@@ -90,6 +91,7 @@
         schema_version = 2;
         widget_order = [
           "desktop-widget-0000000000000004"
+          "desktop-widget-0000000000000006"
         ];
         grid = {
           cell_size = 16;
@@ -116,6 +118,28 @@
               mirrored = true;
               reversed = false;
               show_when_idle = true;
+            };
+          };
+          "desktop-widget-0000000000000006" = {
+            box_height = 240.0;
+            box_width = 480.0;
+            cx = 683.0;
+            cy = 480.0;
+            output = "eDP-1";
+            placement_height = 768.0;
+            placement_width = 1366.0;
+            rotation = 0.0;
+            type = "nirusaki/clearclock:desktop";
+            settings = {
+              adaptiveColors = true;
+              adaptiveGradients = false;
+              background = false;
+              clockShowSeconds = false;
+              dayBoldText = true;
+              frostedFont = false;
+              frostedGlass = false;
+              glassStrength = 1.0;
+              renderInstance = "desktop-widget-0000000000000006";
             };
           };
         };
@@ -380,21 +404,25 @@
           browser_open_near_click = true;
           download_dir = "${config.home.homeDirectory}/nixos-config/assets/wallpapers";
         };
-        "notoxus/media-island" = {
-          auto_show = false;
-          preview_seconds = 1;
+        "yuuto/calculator" = {
+          panel_position = "top_right";
         };
       };
       plugins = {
+        auto_update = "official";
         enabled = [
           "noctalia/wallhaven"
           "dotnetrob/cat"
           "ashur-d/wallpaper-widget"
-          "notoxus/media-island"
           "aristides/udiskie"
           "alexmnrs/github-activity"
           "theblackdon/theme-switcher"
           "hy4ri/herdr"
+          "piero-93/battery-power-management"
+          "yuuto/calculator"
+          "nirusaki/clearclock" 
+          "lepinx/typer"
+          "sh4dow/yt-music"
         ];
         source = [
           {
@@ -447,7 +475,7 @@
         source = "wallpaper";
         wallpaper_scheme = "m3-content";
         templates = {
-          builtin_ids = [ "alacritty" "btop" "gtk3" "gtk4" "ghostty" "kitty" "qt" "starship" ];
+          builtin_ids = [ "alacritty" "btop" "gtk3" "gtk4" "ghostty" "kcolorscheme" "kitty" "qt" "starship" ];
           community_ids = [
             "opencode"
             "libreoffice"
@@ -541,4 +569,11 @@
       };
     };
   };
+
+  # Locally patched YouTube Music plugin (cookie header fix + endless play).
+  # Placed in Noctalia's built-in local plugin source so community updates
+  # cannot overwrite it. Symlinked from the repo for easy editing.
+  xdg.dataFile."noctalia/plugins/yt-music".source =
+    config.lib.file.mkOutOfStoreSymlink
+      "${config.home.homeDirectory}/nixos-config/assets/noctalia/plugins/yt-music";
 }

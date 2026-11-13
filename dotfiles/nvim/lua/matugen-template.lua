@@ -80,7 +80,7 @@ function M.setup()
     bg_high = "{{colors.surface_container_high.default.hex}}",
     fg = "{{colors.on_surface.default.hex}}",
     fg_bright = "{{colors.on_background.default.hex}}",
-    fg_muted = "{{colors.on_surface_container.default.hex}}",
+    fg_muted = "{{colors.on_surface_variant.default.hex}}",
     border = "{{colors.outline.default.hex}}",
     primary = "{{colors.primary.default.hex}}",
     secondary = "{{colors.secondary.default.hex}}",

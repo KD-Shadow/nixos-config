@@ -104,6 +104,7 @@
   services.udisks2.enable = true;
   services.gvfs.enable = true;
   programs.dconf.enable = true;
+  hardware.bluetooth.enable = true;
   programs.nix-ld.enable = true;
   virtualisation.docker.enable = true;
   hardware.graphics = {
@@ -124,6 +125,9 @@
     wget
     uv
     efibootmgr
+    ntfs3g
+    exfatprogs
+    parted
     xdg-utils
    (pkgs.python3.withPackages (ps: [
       ps.numpy

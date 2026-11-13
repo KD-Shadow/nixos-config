@@ -41,8 +41,8 @@
       mdfried
       tmux
       smassh
-      chatgpt
       eza
+      ladybird
       zip 
       unzip
       mpv
@@ -61,7 +61,7 @@
       adw-gtk3
       capitaine-cursors
       kora-icon-theme
-      neovide
+    #neovide
       superfile
       eog
       github-cli
@@ -79,7 +79,8 @@
       libreoffice-stable
       tuxedo
       google-cursor
-      yaak
+      bluez
+      bluez-tools
       localsend
       surge-downloader
       jq
@@ -87,7 +88,7 @@
       kitty
       imagemagick
       bubblewrap
-      #inputs.helium.packages.${pkgs.stdenv.hostPlatform.system}.default
+      inputs.helium.packages.${pkgs.stdenv.hostPlatform.system}.default
       inputs.limusic.packages.${pkgs.stdenv.hostPlatform.system}.default
       inputs.strata.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];

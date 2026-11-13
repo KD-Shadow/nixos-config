@@ -128,9 +128,6 @@
         NVIM_APPNAME=wvim nvim $argv
       '';
 
-      fastfetch = ''
-          kitten icat -n --place 30x30@0x0 --scale-up --align left /home/sh4dow/nixos-config/assets/gifs/Miku-v2.gif | command fastfetch --logo-width 30 --raw -
-      '';
 
       mkcd = ''
         mkdir -p $argv[1]
