@@ -116,6 +116,17 @@ function EXPO.cache_audio(video_id, callback)
 	end
 end
 
+-- A cached signed URL can expire or get throttled mid-playback. Drop both the
+-- in-memory and on-disk copies so the next resolve fetches a fresh one.
+function EXPO.invalidate_stream(video_id: string)
+	if type(video_id) ~= "string" or video_id == "" then
+		return
+	end
+	stream_cache[video_id] = nil
+	local safe_id = video_id:gsub("[^%w%-_]", "_")
+	noctalia.removeFile(STREAMS_CACHE_DIR .. "/" .. safe_id .. ".url")
+end
+
 function EXPO.resolve_stream(video_id: string, cb: ((string?) -> ())?)
 	if type(video_id) ~= "string" or video_id == "" then
 		if cb then

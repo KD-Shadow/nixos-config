@@ -8,7 +8,25 @@ local Store = {}
 Store.state = schema.new()
 Store.state.player.volume = 100
 
+-- Publishing is not cheap: noctalia.state.set walks the whole snapshot in C++
+-- (luaToJson + dump) and hands the JSON to every watcher. Doing that inside
+-- playback callbacks (stream resolve, mpv ready, mpv event lines) consumes
+-- their 25 ms CPU budget, and an overrun aborts the callback right there —
+-- which is how a track that finished could sit paused at its end instead of
+-- advancing. Callers now only mark the store dirty; the service flushes once
+-- per update tick, so bursts collapse into a single cheap-to-schedule state.set
+-- that runs outside any playback-critical callback.
+local dirty = false
+
 function Store.publish()
+	dirty = true
+end
+
+function Store.flush()
+	if not dirty then
+		return false
+	end
+	dirty = false
 	local snap = {}
 	local next_nonce = ((Store.state.nonce or 0) + 1)
 	Store.state.nonce = next_nonce
@@ -56,6 +74,7 @@ function Store.publish()
 	snap.refreshing_cache_stats = Store.state.refreshing_cache_stats
 	snap.settings = Store.state.settings
 	noctalia.state.set(STATE_KEY, snap)
+	return true
 end
 
 return Store

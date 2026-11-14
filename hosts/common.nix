@@ -105,7 +105,6 @@
   services.gvfs.enable = true;
   programs.dconf.enable = true;
   hardware.bluetooth.enable = true;
-  programs.nix-ld.enable = true;
   virtualisation.docker.enable = true;
   hardware.graphics = {
     enable = true;
@@ -118,6 +117,38 @@
     automatic = true;
     dates = "weekly";
     options = "--delete-older-than 14d";
+  };
+
+  # nix ld
+  programs.nix-ld = {
+    enable = true;
+    libraries = with pkgs; [
+      alsa-lib
+      atk
+      at-spi2-atk
+      at-spi2-core
+      cairo
+      cups
+      dbus
+      expat
+      mesa
+      glib
+      mesa
+      libgbm
+      gtk3
+      nspr
+      nss
+      pango
+      systemd
+      libX11
+      libxcb
+      libXcomposite
+      libXdamage
+      libXext
+      libXfixes
+      libXrandr
+      libxkbcommon
+    ];
   };
   environment.systemPackages = with pkgs; [
     git

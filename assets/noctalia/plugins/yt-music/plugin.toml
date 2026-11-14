@@ -1,6 +1,6 @@
 id = "sh4dow/yt-music"
 name = "YouTube Music"
-version = "0.4.5" # rc
+version = "0.4.6" # rc
 plugin_api = 43
 icon = "brand-youtube-filled"
 author = "Aabid"

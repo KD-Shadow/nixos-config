@@ -45,7 +45,7 @@
       ladybird
       zip 
       unzip
-      mpv
+      (mpv.override { scripts = [ mpvScripts.mpris ]; })
       lazygit
       libnotify
       zoxide

@@ -122,8 +122,40 @@ function onOpen(_context)
 	end
 end
 
+-- State snapshots can arrive in bursts (loading -> resolved -> thumbnails ->
+-- stats). Applying each one synchronously rebuilds the whole panel inside the
+-- watcher's 25 ms CPU budget, which is what disabled the panel after repeated
+-- timeouts. Coalesce bursts and rebuild from a fresh callback instead.
+local pending_snapshot = nil
+local apply_scheduled = false
+
+local function schedule_apply(snapshot)
+	pending_snapshot = snapshot
+	if apply_scheduled then
+		return
+	end
+	apply_scheduled = true
+	local scheduled = noctalia.runAsync("sleep 0.03", function()
+		apply_scheduled = false
+		local snap = pending_snapshot
+		pending_snapshot = nil
+		if snap then
+			state.apply(snap)
+		end
+	end)
+	if not scheduled then
+		-- No async slot: apply now rather than dropping the update.
+		apply_scheduled = false
+		if pending_snapshot then
+			local snap = pending_snapshot
+			pending_snapshot = nil
+			state.apply(snap)
+		end
+	end
+end
+
 if noctalia.state and noctalia.state.watch then
-	noctalia.state.watch(STATE_KEY, state.apply)
+	noctalia.state.watch(STATE_KEY, schedule_apply)
 	local curr = noctalia.state.get(STATE_KEY)
 	if curr then
 		state.apply(curr)

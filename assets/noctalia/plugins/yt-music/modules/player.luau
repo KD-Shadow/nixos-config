@@ -31,6 +31,24 @@ local pending_steps = 0
 local skip_nonce = 0
 local firing_debounce = false
 local queue_skip -- forward: Player.next/prev coalesce through this, defined below
+local advance_steps -- forward: play_index auto-skip and queue_skip use it
+
+-- Bounded recovery: a failed resolve skips at most a couple of tracks before
+-- stopping, and a track that already failed/restarted is not retried in a loop.
+local resolve_failures = 0
+local error_retry_id = nil
+local error_retry_at = 0
+local stalled_retry_id = nil
+local stalled_retry_at = 0
+
+-- Event-stream health, fed by start_stream and inspected by Player.watchdog
+-- from the service update tick.
+local last_stream_ms = 0
+local awaiting_mpv_ready = false
+local last_stream_restart_ms = 0
+local stream_restart_count = 0
+local eof_since_ms = 0
+local eof_retries = 0
 
 -- Endless play: when the queue approaches its end, seed a YouTube Music radio
 -- mix from the newest track and append its recommendations. With repeat off,
@@ -149,6 +167,7 @@ local function player_set(item, stream_url)
 	state.player.duration = tonumber(item.duration) or 0
 	state.player.status = "playing"
 	state.player.position = 0
+	state.player.eof = false
 	state.player.codec_fetched = false
 	state.player.bitrate = nil
 	state.player.codec = nil
@@ -193,7 +212,9 @@ local function player_set(item, stream_url)
 		end)
 	end
 
+	awaiting_mpv_ready = true
 	mpv.play(stream_url, title, state.player.volume, function(ready)
+		awaiting_mpv_ready = false
 		if ready then
 			start_stream()
 		end
@@ -329,7 +350,60 @@ function Player.play_index(index, queue)
 	state.player.views = 0
 	state.player.likes = 0
 	state.player.status = "loading"
-	publish()
+	state.player.eof = false
+	eof_retries = 0
+
+	local function on_resolved(url)
+		if gen ~= play_generation then
+			log(
+				"play_index: dropped stale stream response (gen "
+					.. gen
+					.. " < "
+					.. play_generation
+					.. ") for '"
+					.. tostring(item.title)
+					.. "'"
+			)
+			return
+		end
+		if not url or url == "" then
+			log("play_index: stream resolve FAILED for '" .. tostring(item.title) .. "'")
+			resolve_failures = resolve_failures + 1
+			-- One failed resolve (expired URL, transient extractor hiccup,
+			-- refused spawn) should not end the listening session. Move on;
+			-- bounded so a broken queue still stops instead of spinning.
+			if resolve_failures <= 2 and #state.player.queue > 1 then
+				state.status_text = "Could not play " .. tostring(item.title or "track") .. " — skipping"
+				noctalia.notify("YouTube Music", state.status_text)
+				pending_steps = pending_steps + 1
+				advance_steps()
+			else
+				resolve_failures = 0
+				state.player.status = "stopped"
+				state.status_text = "Could not resolve stream for " .. tostring(item.title)
+				publish()
+			end
+			return
+		end
+
+		resolve_failures = 0
+		log("play_index: stream resolved (" .. #url .. " chars), dispatching to mpv")
+		player_set(item, url)
+	end
+
+	-- Start the fetch before any bookkeeping. publish(), autoplay top-up and
+	-- logging are non-critical; if the callback's CPU budget runs out in them,
+	-- the song must already be on its way to mpv rather than leaving the old
+	-- player paused with nothing left to resolve.
+	if superseding then
+		-- Newest intent's fetch spawns only after the stale ones are dead, so
+		-- a saturated pool can never refuse the song we actually land on.
+		kill_stale_resolves(function()
+			api.resolve_stream(item.id, on_resolved)
+		end)
+	else
+		api.resolve_stream(item.id, on_resolved)
+	end
 
 	-- Top up while approaching the tail: two tracks of headroom is enough for
 	-- the radio request to land before natural advance reaches the end.
@@ -352,40 +426,7 @@ function Player.play_index(index, queue)
 			.. tostring(item.title)
 			.. "'"
 	)
-
-	local function on_resolved(url)
-		if gen ~= play_generation then
-			log(
-				"play_index: dropped stale stream response (gen "
-					.. gen
-					.. " < "
-					.. play_generation
-					.. ") for '"
-					.. tostring(item.title)
-					.. "'"
-			)
-			return
-		end
-		if not url or url == "" then
-			state.player.status = "stopped"
-			state.status_text = "Could not resolve stream for " .. tostring(item.title)
-			publish()
-			log("play_index: stream resolve FAILED for '" .. tostring(item.title) .. "'")
-			return
-		end
-		log("play_index: stream resolved (" .. #url .. " chars), dispatching to mpv")
-		player_set(item, url)
-	end
-
-	if superseding then
-		-- Newest intent's fetch spawns only after the stale ones are dead, so
-		-- a saturated pool can never refuse the song we actually land on.
-		kill_stale_resolves(function()
-			api.resolve_stream(item.id, on_resolved)
-		end)
-	else
-		api.resolve_stream(item.id, on_resolved)
-	end
+	publish()
 end
 
 function Player.play(item)
@@ -487,6 +528,8 @@ end
 function Player.stop()
 	mpv.kill()
 	state.player.status = "stopped"
+	state.player.eof = false
+	eof_retries = 0
 	state.player.queue = {}
 	original_queue = nil
 	autoplay_epoch = autoplay_epoch + 1
@@ -547,6 +590,7 @@ function Player.next(is_natural_end)
 		mpv.send((noctalia.json.encode({ command = { "seek", 0, "absolute" } })))
 		state.player.position = 0
 		state.player.status = "playing"
+		state.player.eof = false
 		publish()
 		return
 	end
@@ -558,6 +602,10 @@ function Player.next(is_natural_end)
 		and (state.player.index or 0) >= #state.player.queue
 		and autoplay_available()
 	then
+		-- The advance is already in flight (radio fetch + waiter); clearing the
+		-- EOF marker keeps the watchdog from queueing a second advance that
+		-- would double-skip once the batch lands.
+		state.player.eof = false
 		autoplay_extend(function(added)
 			if added > 0 and (state.player.index or 0) < #state.player.queue then
 				Player.next(false)
@@ -577,7 +625,7 @@ end
 -- Walk the accumulated manual steps in one go and resolve+play only the
 -- landing: no intermediate player_set, so skipped-over songs (even cached
 -- ones) never become audible.
-local function advance_steps()
+advance_steps = function()
 	local steps = pending_steps
 	pending_steps = 0
 	if steps == 0 then
@@ -779,6 +827,15 @@ function Player.restore_session(sess)
 	state.player.index = sess.index or 0
 	state.player.queue = type(sess.queue) == "table" and sess.queue or {}
 	state.player.status = "paused"
+	-- A restored session is a clean paused state, not an ended track: clear the
+	-- runtime-only markers a previous track may have left behind so the
+	-- watchdog does not treat the restore as a stuck natural end.
+	state.player.eof = false
+	state.player.codec_fetched = false
+	state.player.bitrate = nil
+	state.player.codec = nil
+	state.player.samplerate = nil
+	eof_retries = 0
 	log("session restored: '" .. state.player.title .. "' queue=" .. #state.player.queue)
 	if api and api.track_stats and sess.id and sess.id ~= "" then
 		api.track_stats(sess.id, function(views, likes)
@@ -810,6 +867,28 @@ local function handle_stream_line(line)
 					.. ") entry="
 					.. tostring(data.playlist_entry_id)
 			)
+			-- Most mid-track failures are an expired/throttled signed URL, not
+			-- a dead video. Drop the cached URL and replay the same track once
+			-- before surfacing a failure.
+			local id = state.player.id
+			local now = noctalia.nowMs()
+			if id and id ~= "" and (error_retry_id ~= id or now - error_retry_at > 60000) then
+				error_retry_id = id
+				error_retry_at = now
+				if api and api.invalidate_stream then
+					api.invalidate_stream(id)
+				end
+				state.player.eof = false
+				state.player.status = "loading"
+				state.status_text = "Retrying " .. tostring(state.player.title or "track")
+				log("stream: end-file error, retrying track with a fresh URL")
+				publish()
+				-- No explicit kill: mpv_play serialises on the same lock and
+				-- kills the previous instance itself. A separate kill queued
+				-- behind the new play could take the fresh mpv down with it.
+				Player.play_index(state.player.index)
+				return
+			end
 			mpv.kill()
 			state.player.status = "stopped"
 			state.status_text = "Playlist failed to start: " .. tostring(state.player.title or "")
@@ -843,6 +922,11 @@ local function handle_stream_line(line)
 		local st = state.player.status
 		if data.data == true and (st == "playing" or st == "paused") then
 			log("stream: eof-reached -> next(true)")
+			-- Watchdog marker: if the advance below never produces a new
+			-- track, the update tick retries it instead of leaving mpv paused
+			-- at the end of the song.
+			state.player.eof = true
+			eof_since_ms = noctalia.nowMs()
 			Player.next(true)
 		end
 		return
@@ -901,12 +985,81 @@ end
 start_stream = function()
 	stream_generation = stream_generation + 1
 	local gen = stream_generation
+	-- Timestamp the arm even before the first line arrives so the watchdog
+	-- notices a stream that never delivers anything (refused spawn, socket
+	-- that never appeared).
+	last_stream_ms = noctalia.nowMs()
 	mpv.stream(function(line)
 		if stream_generation ~= gen then
 			return
 		end
+		last_stream_ms = noctalia.nowMs()
+		stream_restart_count = 0
 		handle_stream_line(line)
 	end)
+end
+
+-- Called once per service update tick. Repairs the two ways playback can go
+-- quiet on its own:
+--   * the mpv event stream died (or its spawn was refused), so eof/end-file
+--     events never arrive and no track can ever advance again;
+--   * a natural end fired but the advance produced no new track, leaving mpv
+--     paused at EOF with nothing loading.
+function Player.watchdog()
+	local now = noctalia.nowMs()
+	local st = state.player.status
+
+	if
+		not awaiting_mpv_ready
+		and (st == "playing" or st == "paused")
+		and last_stream_ms > 0
+		and now - last_stream_ms > 6000
+	then
+		if stream_restart_count < 5 then
+			if now - last_stream_restart_ms > 3000 then
+				last_stream_restart_ms = now
+				stream_restart_count = stream_restart_count + 1
+				log("watchdog: event stream silent for " .. (now - last_stream_ms) .. "ms, re-arming")
+				start_stream()
+			end
+		else
+			-- Re-arming did not help: the mpv process itself is gone. Restart
+			-- the current track once rather than waiting for a manual click.
+			local id = state.player.id
+			if id and id ~= "" and (stalled_retry_id ~= id or now - stalled_retry_at > 60000) then
+				stalled_retry_id = id
+				stalled_retry_at = now
+				stream_restart_count = 0
+				log("watchdog: player unresponsive, restarting current track")
+				Player.play_index(state.player.index)
+				return
+			end
+			-- Even a restart did not bring the event stream back. Stop claiming
+			-- to play and say so instead of waiting forever in silence.
+			log("watchdog: player still unresponsive, stopping")
+			state.player.status = "stopped"
+			state.status_text = "Playback stopped unexpectedly"
+			publish()
+			noctalia.notify("YouTube Music", state.status_text)
+		end
+	end
+
+	if state.player.eof and (st == "paused" or st == "playing") then
+		if now - eof_since_ms > 5000 then
+			eof_since_ms = now
+			eof_retries = eof_retries + 1
+			if eof_retries <= 3 then
+				log("watchdog: natural end did not advance, retrying")
+				Player.next(true)
+			else
+				state.player.eof = false
+				state.player.status = "stopped"
+				state.status_text = "Playback stopped at end of queue"
+				publish()
+				noctalia.notify("YouTube Music", state.status_text)
+			end
+		end
+	end
 end
 
 return Player

@@ -337,6 +337,14 @@ function update()
 			5000
 		)
 	end
+
+	-- Retry anything the host refused to spawn because every async slot was
+	-- busy (rapid skipping does that), then re-arm playback event plumbing and
+	-- finally publish once. Flushing last keeps state serialization out of the
+	-- playback callbacks entirely.
+	mpv.flush()
+	player.watchdog()
+	store.flush()
 end
 
 noctalia.setUpdateInterval(1000)

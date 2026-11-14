@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.4.6] - 2026-11-14
+
+### Fixed
+- **Playback no longer stalls between tracks**: publishing the UI snapshot was running inside playback callbacks and could exceed Noctalia's per-callback CPU budget, aborting the callback before the next track was resolved. Publishing is now deferred to the service update tick, stream resolution starts before bookkeeping, and refused mpv launches/event streams are retried.
+- **Natural end advances reliably**: a watchdog re-arms a silent mpv event stream and retries an end-of-track that produced no advance (bounded, with a notification instead of retrying forever).
+- **Mid-track stream failures recover**: a fresh URL is fetched and the same track retried once, instead of stopping playback.
+- **Failed resolves skip ahead**: up to two unplayable tracks are skipped with a notification rather than ending the queue.
+- **Panel stays alive**: bursts of state updates are coalesced and applied outside the state watcher, so repeated budget timeouts no longer disable the panel.
+
 ## [0.4.5] - 2026-11-13
 
 ### Added
