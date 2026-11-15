@@ -7,6 +7,7 @@
 - **Secure APISID fallback**: `SAPISIDHASH` is now built from `__Secure-3PAPISID` (or `__Secure-1PAPISID`) when the plain `SAPISID` row is absent, matching ytmusicapi and yt-dlp. Browser exports of signed-in sessions often omit the plain row.
 - **Extraction cannot overwrite a working session**: the cookie file is only replaced when the capture contains signed-in markers (`SID`, `HSID`, `SSID`, `SAPISID`, `APISID`, `__Secure-1PSID`, `__Secure-1PAPISID`, `LOGIN_INFO`).
 - **Second click on a browser tile extracts**: the sign-in window is kept between attempts and a still-running debug instance is reused (opening a tab instead of relaunching), so clicking the tile again captures the session without discarding cookies that Chromium had not flushed yet.
+- **Cache size scan no longer overruns the callback budget**: the streams/thumbnails/audio directories are walked in bounded slices instead of one `fileInfo` pass, so opening the cache page can no longer abort with a budget error and leave the sizes stuck on "refreshing". A refused slice is retried from the service update tick.
 
 ## [0.4.6] - 2026-11-14
 

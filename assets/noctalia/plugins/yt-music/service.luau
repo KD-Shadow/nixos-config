@@ -352,6 +352,9 @@ function update()
 	if library.pump_audit then
 		library.pump_audit()
 	end
+	if cacheops.pump_stats then
+		cacheops.pump_stats()
+	end
 	store.flush()
 end
 
