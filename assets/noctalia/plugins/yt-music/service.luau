@@ -393,7 +393,11 @@ noctalia.runAsync("true", function()
 			state.recent_playlists = cached_recent
 		end
 	end
-	home.refresh_home()
+	-- Only refresh the home feed for a verified session: the guest response is
+	-- two generic shelves and would overwrite the personalised cache.
+	auth.verify_login(function()
+		home.refresh_home()
+	end)
 	if api and api.load_session then
 		local sess = api.load_session()
 		if type(sess) == "table" and sess.id and sess.id ~= "" then

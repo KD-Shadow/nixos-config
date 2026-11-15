@@ -11,6 +11,7 @@ local function new()
 		health = {},
 		checking_health = false,
 		extracting = false,
+		login_pending = false,
 		last_error = "",
 		player = {
 			status = "stopped",

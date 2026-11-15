@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.7] - 2026-11-15
+
+### Fixed
+- **Sign-in is verified, not assumed**: a saved cookie file can contain a full set of YouTube rows and still be signed out, because guests receive `__Secure-3PSID`/`__Secure-3PAPISID` too. The plugin now probes the library endpoint's `logged_in` flag after loading or extracting cookies, and reports "Saved cookies are signed out" instead of claiming to be ready while private and account playlists render empty.
+- **Secure APISID fallback**: `SAPISIDHASH` is now built from `__Secure-3PAPISID` (or `__Secure-1PAPISID`) when the plain `SAPISID` row is absent, matching ytmusicapi and yt-dlp. Browser exports of signed-in sessions often omit the plain row.
+- **Extraction cannot overwrite a working session**: the cookie file is only replaced when the capture contains signed-in markers (`SID`, `HSID`, `SSID`, `SAPISID`, `APISID`, `__Secure-1PSID`, `__Secure-1PAPISID`, `LOGIN_INFO`).
+- **Second click on a browser tile extracts**: the sign-in window is kept between attempts and a still-running debug instance is reused (opening a tab instead of relaunching), so clicking the tile again captures the session without discarding cookies that Chromium had not flushed yet.
+
 ## [0.4.6] - 2026-11-14
 
 ### Fixed

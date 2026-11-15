@@ -30,6 +30,11 @@ local types = require("../utils/types.luau")
 
 local EXPO = {}
 
+-- Auth state lives in the InnerTube module, but callers only ever see the
+-- merged API table, so expose the session helpers from here.
+EXPO.invalidate_auth = it.invalidate_auth
+EXPO.check_login = it.check_login
+
 local pending_library: any? = nil
 
 -- The library landing page is a single gridRenderer page of ~25 entries; the

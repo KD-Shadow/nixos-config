@@ -68,7 +68,11 @@ end
 local function build_auth(): (string?, string?)
 	if not auth_state.ready or auth_state.sapisid == "" then
 		local values = load_cookie_values()
-		local sapisid = values["SAPISID"]
+		-- Modern browser exports often carry only the secure APISID variants;
+		-- the plain SAPISID row can be absent even on a signed-in session.
+		-- ytmusicapi hashes __Secure-3PAPISID with SAPISIDHASH, and yt-dlp uses
+		-- it as the SAPISID fallback, so accept the same sources here.
+		local sapisid = values["SAPISID"] or values["__Secure-3PAPISID"] or values["__Secure-1PAPISID"]
 		local cookieParts = {}
 		for k, v in pairs(values) do
 			if k:sub(1, 3) ~= "ST-" then
@@ -160,5 +164,26 @@ end
 
 EXPO.build_auth = build_auth
 EXPO.innerTube = innerTube
+
+-- Cookie rows alone do not prove a signed-in session: YouTube hands signed-out
+-- visitors the same __Secure-3PSID/__Secure-3PAPISID pair, so a stale or
+-- logged-out export still looks healthy until a private playlist comes back
+-- empty. Probe the library landing page, whose response advertises the real
+-- login state, and report it to the caller.
+function EXPO.check_login(cb: (boolean, string?) -> ())
+	if not network.isOnline() then
+		cb(false, "offline")
+		return
+	end
+	innerTube("browse", { context = const.CONTEXT.context, browseId = "FEmusic_library_landing" }, function(body, err)
+		if type(body) ~= "string" then
+			cb(false, err or "no response")
+			return
+		end
+		-- Second value stays nil: the probe answered, so a false result really
+		-- means "signed out" rather than "network hiccup".
+		cb(body:find('"logged_in","value":"1"', 1, true) ~= nil)
+	end, true)
+end
 
 return EXPO

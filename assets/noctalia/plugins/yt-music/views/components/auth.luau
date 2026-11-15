@@ -164,7 +164,7 @@ local function build_browser_cells()
 		local glyph, label_color = b.icon, "on_surface"
 		local fill, border = "surface_container/0.3", "outline_variant"
 		local click = function()
-			if state.data.browser == b.id and state.data.status_text:find("Opened") then
+			if state.data.browser == b.id and (state.data.login_pending or state.data.status_text:find("Opened")) then
 				request("extract", { browser = b.id })
 			else
 				request("open_login", { browser = b.id })

@@ -228,6 +228,10 @@ local function build_playlist_view()
 			empty_text = 'No tracks match "' .. query .. '".'
 		elseif state.data.online == false then
 			empty_text = "You're offline — this playlist isn't downloaded."
+		elseif state.data.status == "error" then
+			-- Account-only playlists come back empty when YouTube sees a
+			-- signed-out session instead of failing outright.
+			empty_text = "This playlist needs a signed-in session. Sign in again from the Account tab."
 		else
 			empty_text = "No tracks found in playlist."
 		end

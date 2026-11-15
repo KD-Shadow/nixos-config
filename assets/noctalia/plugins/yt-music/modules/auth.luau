@@ -28,6 +28,7 @@ function Auth.open_login(browser)
 	local label = Auth.browser_label(target)
 	state.browser = target
 	state.browser_label = label
+	state.login_pending = true
 	state.status_text = "Opened " .. label .. ". Sign in, then click " .. label .. " again to extract."
 	log("open_login: browser=" .. target)
 	store.publish()
@@ -70,12 +71,31 @@ function Auth.extract_cookies(browser)
 		local cookies = out:match("OUT=([^\n]+)") or ""
 		local total = tonumber(out:match("TOTAL=([^\n]+)") or "0") or 0
 		local kept = tonumber(out:match("KEPT=([^\n]+)") or "0") or 0
+		local login = out:match("LOGIN=(%d)")
 		local err_log = out:match("LOG=([^\n]*)") or ""
 
 		extraction_active = false
 		state.extracting = false
 
-		if kept > 0 then
+		if login == "0" and kept > 0 then
+			-- The capture has cookies, but none of the rows that only a signed-in
+			-- Google session carries. Keep any previously saved file untouched and
+			-- leave the browser open so the user can finish signing in.
+			-- login_pending is cleared so the next click re-focuses the browser
+			-- instead of extracting an unchanged profile again.
+			state.login_pending = false
+			state.status = "error"
+			state.status_text = "No signed-in YouTube session found in " .. label
+			state.last_error = "Sign in to YouTube Music in the browser window that opened, then pick "
+				.. label
+				.. " again."
+			if noctalia.notify then
+				noctalia.notify(
+					"YouTube Music",
+					"No signed-in session found in " .. label .. ". Finish signing in, then pick it again."
+				)
+			end
+		elseif kept > 0 then
 			state.status = "ready"
 			state.temp_dir = dir
 			state.cookies_path = cookies
@@ -93,17 +113,26 @@ function Auth.extract_cookies(browser)
 			if api and api.invalidate_auth then
 				api.invalidate_auth()
 			end
-			if api and api.library then
-				api.library()
-			end
-			home.refresh_home(true)
+			-- Do not load library/home until the API confirms the captured
+			-- cookies carry a real account session. A signed-out capture still
+			-- has cookie rows, and calling these against it would leave the user
+			-- with an empty library while the UI said "ready".
+			Auth.verify_login(function()
+				if api and api.library then
+					api.library()
+				end
+				home.refresh_home(true)
+			end)
 		else
 			state.status = "error"
-			state.cookies_path = ""
-			state.temp_dir = dir
-			state.cookie_count = 0
-			state.last_error = err_log
+			state.login_pending = false
 			state.status_text = "No YouTube session found in " .. label
+			state.last_error = err_log
+			if (state.cookie_count or 0) <= 0 then
+				state.cookies_path = ""
+				state.temp_dir = dir
+				state.cookie_count = 0
+			end
 			if noctalia.notify then
 				noctalia.notify(
 					"YouTube Music",
@@ -115,6 +144,51 @@ function Auth.extract_cookies(browser)
 		end
 		store.publish()
 	end, 60000, browser)
+end
+
+-- Counting cookie rows does not prove a session: YouTube hands signed-out
+-- visitors the same __Secure-3PSID/__Secure-3PAPISID pair it gives accounts.
+-- Ask InnerTube, and mark the status signed-out when the probe says logged
+-- out — otherwise private playlists silently render empty while the UI claims
+-- the plugin is ready.
+function Auth.verify_login(on_ok)
+	if not (api and api.check_login) then
+		if on_ok then
+			on_ok()
+		end
+		return
+	end
+	api.check_login(function(ok, probe_err)
+		if ok then
+			state.status = "ready"
+			state.login_pending = false
+			state.last_error = ""
+			local text = state.status_text or ""
+			if text:find("signed out", 1, true) or text:find("No signed-in", 1, true) then
+				state.status_text = "Signed in"
+			end
+			store.publish()
+			if on_ok then
+				on_ok()
+			end
+		elseif probe_err then
+			-- The probe itself failed (offline, timeout). That says nothing about
+			-- the session, so keep whatever status we had and continue.
+			log("check_login: probe failed (" .. tostring(probe_err) .. ")")
+			if on_ok then
+				on_ok()
+			end
+		else
+			state.status = "error"
+			-- Leave login_pending false: the next tile click should reopen the
+			-- browser (its saved profile may still hold a session) rather than
+			-- jumping straight to extraction with no window on screen.
+			state.login_pending = false
+			state.status_text = "Saved cookies are signed out"
+			state.last_error = "The stored YouTube session is signed out or expired. Open a browser, sign in to YouTube Music, then pick that browser again to extract fresh cookies."
+			store.publish()
+		end
+	end)
 end
 
 function Auth.load_cached_cookies()
@@ -144,10 +218,18 @@ function Auth.load_cached_cookies()
 				home.load_cached()
 				library.sync_audio_cache()
 				store.publish()
-				home.refresh_home()
+				Auth.verify_login(function()
+					home.refresh_home()
+				end)
 			end
 		else
 			log("cookies: none — signed out")
+			state.status = "idle"
+			state.status_text = "Not logged in"
+			state.cookies_path = ""
+			state.cookie_count = 0
+			state.last_error = ""
+			store.publish()
 		end
 	end, 8000)
 end

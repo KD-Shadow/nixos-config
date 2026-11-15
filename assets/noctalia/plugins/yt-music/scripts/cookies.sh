@@ -22,6 +22,19 @@ strip_st_cookies() {
   awk -F'\t' 'BEGIN { OFS="\t" } NF >= 6 && $6 ~ /^ST-/ { next } { print }'
 }
 
+# A signed-in Google session always carries at least one of these rows. A
+# signed-out visit still leaves __Secure-3PSID/__Secure-3PAPISID behind, so
+# those alone must not count as a successful login.
+has_login_cookies() {
+  awk -F'\t' '
+    $6 == "SID" || $6 == "HSID" || $6 == "SSID" ||
+    $6 == "SAPISID" || $6 == "APISID" ||
+    $6 == "__Secure-1PSID" || $6 == "__Secure-1PAPISID" ||
+    $6 == "LOGIN_INFO" { found = 1; exit }
+    END { exit found ? 0 : 1 }
+  ' "$1" 2>/dev/null
+}
+
 # Locates the Zen profile (Firefox based) that holds the YouTube cookies.
 # The profile actually in use is the one `[Install*] Default=` points at, not
 # the `Default=1` flag in `[Profile*]`, which can be a leftover empty profile.
@@ -91,9 +104,16 @@ open_browser() {   # $1=browser id
     if [ "$b" = "firefox" ] || [ "$b" = "zen" ]; then
       "$B" "https://music.youtube.com" >/dev/null 2>&1 &
     else
-      # Clean up lingering processes and locks to ensure port 9222 binds
+      # A debug instance launched by an earlier click may still be running with
+      # the sign-in in progress. Reuse it — killing it would drop unsaved
+      # cookies and the OAuth state — and just open a tab instead.
+      if curl -s --max-time 1 http://127.0.0.1:9222/json/version >/dev/null 2>&1; then
+        curl -s --max-time 2 -X PUT "http://127.0.0.1:9222/json/new?https://music.youtube.com" >/dev/null 2>&1 || true
+        exit 0
+      fi
+      # No debug instance left: clear a stale process so port 9222 binds. The
+      # profile directory is kept so an existing session survives.
       pkill -9 -f "yt-music/profiles/$b" 2>/dev/null || true
-      rm -rf "$cache_dir" 2>/dev/null
       mkdir -p "$cache_dir"
       sleep 0.5
       "$B" --remote-debugging-port=9222 --user-data-dir="$cache_dir" "https://music.youtube.com" >/dev/null 2>&1 &
@@ -109,6 +129,7 @@ extract_cookies() {   # $1=browser id
   TMPD=$(mktemp -d /tmp/yt-music.XXXXXX 2>/dev/null)
   [ -n "$TMPD" ] || { TMPD=/tmp/yt-music; mkdir -p "$TMPD"; }
   RAW="$TMPD/raw_$browser.txt"
+  FRESH="$TMPD/cookies_fresh.txt"
   OUT_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/yt-music"
   mkdir -p "$OUT_DIR"
   OUT="$OUT_DIR/cookies.txt"
@@ -175,11 +196,8 @@ extract_cookies() {   # $1=browser id
   fi
 
   if [ "$cdp_done" -eq 1 ]; then
-    strip_st_cookies < "$RAW" > "$OUT"
+    strip_st_cookies < "$RAW" > "$FRESH"
     LOG="CDP extraction successful via port 9222"
-    # Close debug browser instance and clean up its profile directory
-    pkill -9 -f "yt-music/profiles/$browser" 2>/dev/null || true
-    rm -rf "${XDG_CACHE_HOME:-$HOME/.cache}/yt-music/profiles/$browser" 2>/dev/null
   else
     if [ "$browser" = "zen" ]; then
       ZEN_P=$(zen_profile_dir)
@@ -212,21 +230,42 @@ extract_cookies() {   # $1=browser id
       fi
     else
       LOG=$(timeout 45 yt-dlp --cookies-from-browser "$CFB" --cookies "$RAW" --skip-download --no-warnings --no-playlist "https://music.youtube.com" 2>&1 | tr '\n' ' ')
-      grep -iE '^#|(youtube\.com|youtu\.be|youtube-nocookie\.com|ytimg\.com|googlevideo\.com|yt\.be|youtubeeducation\.com)' "$RAW" 2>/dev/null | strip_st_cookies > "$OUT"
+      grep -iE '^#|(youtube\.com|youtu\.be|youtube-nocookie\.com|ytimg\.com|googlevideo\.com|yt\.be|youtubeeducation\.com)' "$RAW" 2>/dev/null | strip_st_cookies > "$FRESH"
     fi
   fi
   TOTAL=$(grep -vc '^#' "$RAW" 2>/dev/null || echo 0)
   if [ "${no_profile:-0}" -eq 1 ]; then
     KEPT=0
   else
-    KEPT=$(grep -vc '^#' "$OUT" 2>/dev/null || echo 0)
+    KEPT=$(grep -vc '^#' "$FRESH" 2>/dev/null || echo 0)
   fi
+
+  # Only replace the saved cookie file when the capture actually contains a
+  # signed-in session. Otherwise clicking extract before login finishes would
+  # overwrite a cookie file that still works with a signed-out one.
+  LOGIN=0
+  if [ -s "$FRESH" ] && has_login_cookies "$FRESH"; then
+    if cp "$FRESH" "$OUT" 2>/dev/null; then
+      LOGIN=1
+    fi
+  fi
+
+  # On success the debug browser has served its purpose; close it and drop its
+  # profile. When the capture is still signed out, leave it running so the user
+  # can finish signing in and click the same browser again.
+  if [ "$cdp_done" -eq 1 ] && [ "$LOGIN" -eq 1 ]; then
+    pkill -9 -f "yt-music/profiles/$browser" 2>/dev/null || true
+    rm -rf "${XDG_CACHE_HOME:-$HOME/.cache}/yt-music/profiles/$browser" 2>/dev/null
+  fi
+
   rm -rf "$TMPD"
   echo "DIR=$OUT_DIR"
   echo "RAW=$RAW"
   echo "OUT=$OUT"
   echo "TOTAL=$TOTAL"
   echo "KEPT=$KEPT"
+  echo "LOGIN=$LOGIN"
+  echo "CDP=$cdp_done"
   echo "LOG=$LOG"
 }
 
