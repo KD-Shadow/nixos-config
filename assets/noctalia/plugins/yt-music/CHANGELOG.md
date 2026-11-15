@@ -8,6 +8,7 @@
 - **Mid-track stream failures recover**: a fresh URL is fetched and the same track retried once, instead of stopping playback.
 - **Failed resolves skip ahead**: up to two unplayable tracks are skipped with a notification rather than ending the queue.
 - **Panel stays alive**: bursts of state updates are coalesced and applied outside the state watcher, so repeated budget timeouts no longer disable the panel.
+- **Large playlists no longer disable the plugin**: thumbnail scanning, config building and cover attachment are chunked across async ticks instead of running in one callback, and playlist caches are written once per completed walk instead of after every page. The library audit's saved/cached track pass is chunked the same way, so its bookkeeping can no longer stall or leave the audit stuck on large caches.
 
 ## [0.4.5] - 2026-11-13
 

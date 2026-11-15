@@ -344,6 +344,14 @@ function update()
 	-- playback callbacks entirely.
 	mpv.flush()
 	player.watchdog()
+	-- Resume a chunked thumbnail pass whose `true` tick the host refused to
+	-- spawn (async command slots full); otherwise the queue would stall.
+	if api.pump_thumbnails then
+		api.pump_thumbnails()
+	end
+	if library.pump_audit then
+		library.pump_audit()
+	end
 	store.flush()
 end
 

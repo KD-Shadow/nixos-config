@@ -14,6 +14,32 @@ local Library = {}
 local auditing = false
 local audit_pending = false
 
+-- Rows handled per async tick by the audit's finalize pass. The pass used to
+-- run every fileInfo/path_for/fileExists call for the whole audio cache in a
+-- single 25 ms callback, which overran on larger caches and left `auditing`
+-- stuck true (the abort skipped the reset).
+local AUDIT_CHUNK = 96
+
+-- If the host refuses a chunk tick (async command slots full), remember it and
+-- let the service update tick retry. Dropping the tick would leave `auditing`
+-- true forever and block every later audit.
+local stalled_audit_tick = nil
+
+local function schedule_audit_tick(fn)
+	if noctalia.runAsync("true", fn) == false then
+		stalled_audit_tick = fn
+	end
+end
+
+-- Called from the service update tick. Re-spawn rather than running the chunk
+-- inline, so recovery stays inside its own async callback budget.
+function Library.pump_audit()
+	local fn = stalled_audit_tick
+	if fn and noctalia.runAsync("true", fn) ~= false then
+		stalled_audit_tick = nil
+	end
+end
+
 -- Saved-track metadata persistence (offline_meta.json): standalone
 -- downloads keep their title/artist here so restarts stay labeled.
 local meta_loaded = false
@@ -268,159 +294,268 @@ function Library.audit_downloaded_playlists()
 	end
 
 	local function finalize()
-		pcall(function()
-			if state.player and type(state.player.queue) == "table" then
-				harvest_meta(state.player.queue)
-			end
-			if type(state.home_sections) == "table" then
-				for _, section in ipairs(state.home_sections) do
-					if type(section) == "table" and type(section.items) == "table" then
-						harvest_meta(section.items)
-					end
-				end
-			end
-
-			if noctalia.fileExists(const.SESSION_CACHE_PATH) then
-				local raw = noctalia.readFile(const.SESSION_CACHE_PATH)
-				local sess = raw and noctalia.json.decode(raw)
-				if type(sess) == "table" and type(sess.queue) == "table" then
-					harvest_meta(sess.queue)
-				end
-			end
-			if noctalia.fileExists(const.HOME_SECTIONS_CACHE_PATH) then
-				local raw = noctalia.readFile(const.HOME_SECTIONS_CACHE_PATH)
-				local cached_home = raw and noctalia.json.decode(raw)
-				local sections = (type(cached_home) == "table" and type(cached_home.sections) == "table")
-						and cached_home.sections
-					or cached_home
-				if type(sections) == "table" then
-					for _, section in ipairs(sections) do
-						if type(section) == "table" and type(section.items) == "table" then
-							harvest_meta(section.items)
-						end
-					end
-				end
-			end
-		end)
-
-		Library.load_cached_meta()
-		for vid, m in pairs(cached_meta) do
-			if not meta[vid] then
-				meta[vid] = m
-			end
-		end
-
-		-- Saved Tracks are EXPLICIT downloads only: songs that were merely
-		-- auto-cached during playback have no offline_meta entry and go
-		-- into cached_tracks instead.
+		local fin = { phase = "harvest" }
 		local offline = {}
 		local cached_tracks = {}
-		for vid, own in pairs(state.offline_meta) do
-			if cached[vid] and not member_ids[vid] then
-				local m = meta[vid] or own
-				local info = noctalia.fileInfo(AUDIO_DIR .. "/" .. vid .. ".opus")
-				local thumb = thumbs.path_for(vid, m.thumbnail_url)
-				table.insert(offline, {
-					id = vid,
-					title = m.title,
-					artist = m.artist or "",
-					duration = m.duration or 0,
-					thumbnail_url = m.thumbnail_url,
-					thumb_path = noctalia.fileExists(thumb) and thumb or nil,
-					added_at = (info and info.mtime) or 0,
-				})
-			end
-		end
-
 		local cached_meta_updated = false
-		for vid in pairs(cached) do
-			if not state.offline_meta[vid] and not member_ids[vid] then
-				local m = meta[vid] or {}
-				if m.title and not cached_meta[vid] then
-					cached_meta[vid] = {
-						title = m.title,
-						artist = m.artist or "",
-						duration = tonumber(m.duration) or 0,
-						thumbnail_url = m.thumbnail_url,
-					}
-					cached_meta_updated = true
-				end
-				local info = noctalia.fileInfo(AUDIO_DIR .. "/" .. vid .. ".opus")
-				local thumb = m.thumbnail_url and thumbs.path_for(vid, m.thumbnail_url)
-				table.insert(cached_tracks, {
-					id = vid,
-					title = m.title or vid,
-					artist = m.artist or "",
-					duration = m.duration or 0,
-					thumbnail_url = m.thumbnail_url,
-					thumb_path = (thumb and noctalia.fileExists(thumb)) and thumb or nil,
-					added_at = (info and info.mtime) or 0,
-				})
-			end
-		end
-		if cached_meta_updated then
-			Library.save_cached_meta()
-		end
-
-		table.sort(offline, function(a, b)
-			return (a.added_at or 0) > (b.added_at or 0)
-		end)
-		table.sort(cached_tracks, function(a, b)
-			return (a.added_at or 0) > (b.added_at or 0)
-		end)
-		state.offline_tracks = offline
-		state.cached_tracks = cached_tracks
-
 		local missing_vids = {}
-		for _, tr in ipairs(cached_tracks) do
-			if not tr.artist or tr.artist == "" or tr.title == tr.id then
-				table.insert(missing_vids, tr.id)
-			end
-		end
-		if #missing_vids > 0 then
-			Library.resolve_missing_meta(missing_vids)
+
+		local advance
+		local function tick()
+			schedule_audit_tick(advance)
 		end
 
-		-- Prune metadata whose audio vanished (e.g. Clear Audio) so the
-		-- persisted file cannot grow stale entries forever.
-		local pruned = false
-		for vid in pairs(state.offline_meta) do
-			if not cached[vid] then
-				state.offline_meta[vid] = nil
-				pruned = true
+		advance = function()
+			if fin.phase == "harvest" then
+				pcall(function()
+					if state.player and type(state.player.queue) == "table" then
+						harvest_meta(state.player.queue)
+					end
+					if type(state.home_sections) == "table" then
+						for _, section in ipairs(state.home_sections) do
+							if type(section) == "table" and type(section.items) == "table" then
+								harvest_meta(section.items)
+							end
+						end
+					end
+
+					if noctalia.fileExists(const.SESSION_CACHE_PATH) then
+						local raw = noctalia.readFile(const.SESSION_CACHE_PATH)
+						local sess = raw and noctalia.json.decode(raw)
+						if type(sess) == "table" and type(sess.queue) == "table" then
+							harvest_meta(sess.queue)
+						end
+					end
+					if noctalia.fileExists(const.HOME_SECTIONS_CACHE_PATH) then
+						local raw = noctalia.readFile(const.HOME_SECTIONS_CACHE_PATH)
+						local cached_home = raw and noctalia.json.decode(raw)
+						local sections = (type(cached_home) == "table" and type(cached_home.sections) == "table")
+								and cached_home.sections
+							or cached_home
+						if type(sections) == "table" then
+							for _, section in ipairs(sections) do
+								if type(section) == "table" and type(section.items) == "table" then
+									harvest_meta(section.items)
+								end
+							end
+						end
+					end
+				end)
+
+				Library.load_cached_meta()
+				for vid, m in pairs(cached_meta) do
+					if not meta[vid] then
+						meta[vid] = m
+					end
+				end
+
+				fin.phase = "offline"
+				fin.key = nil
+				tick()
+				return
+			end
+
+			-- Saved Tracks are EXPLICIT downloads only: songs that were merely
+			-- auto-cached during playback have no offline_meta entry and go
+			-- into cached_tracks instead.
+			if fin.phase == "offline" then
+				local n = 0
+				local more = true
+				while n < AUDIT_CHUNK do
+					local vid, own = next(state.offline_meta, fin.key)
+					if vid == nil then
+						more = false
+						break
+					end
+					fin.key = vid
+					n = n + 1
+					if cached[vid] and not member_ids[vid] then
+						local m = meta[vid] or own
+						local info = noctalia.fileInfo(AUDIO_DIR .. "/" .. vid .. ".opus")
+						local thumb = thumbs.path_for(vid, m.thumbnail_url)
+						table.insert(offline, {
+							id = vid,
+							title = m.title,
+							artist = m.artist or "",
+							duration = m.duration or 0,
+							thumbnail_url = m.thumbnail_url,
+							thumb_path = noctalia.fileExists(thumb) and thumb or nil,
+							added_at = (info and info.mtime) or 0,
+						})
+					end
+				end
+				if more then
+					tick()
+				else
+					fin.phase = "cached"
+					fin.key = nil
+					tick()
+				end
+				return
+			end
+
+			if fin.phase == "cached" then
+				local n = 0
+				local more = true
+				while n < AUDIT_CHUNK do
+					local vid = next(cached, fin.key)
+					if vid == nil then
+						more = false
+						break
+					end
+					fin.key = vid
+					n = n + 1
+					if not state.offline_meta[vid] and not member_ids[vid] then
+						local m = meta[vid] or {}
+						if m.title and not cached_meta[vid] then
+							cached_meta[vid] = {
+								title = m.title,
+								artist = m.artist or "",
+								duration = tonumber(m.duration) or 0,
+								thumbnail_url = m.thumbnail_url,
+							}
+							cached_meta_updated = true
+						end
+						local info = noctalia.fileInfo(AUDIO_DIR .. "/" .. vid .. ".opus")
+						local thumb = m.thumbnail_url and thumbs.path_for(vid, m.thumbnail_url)
+						table.insert(cached_tracks, {
+							id = vid,
+							title = m.title or vid,
+							artist = m.artist or "",
+							duration = m.duration or 0,
+							thumbnail_url = m.thumbnail_url,
+							thumb_path = (thumb and noctalia.fileExists(thumb)) and thumb or nil,
+							added_at = (info and info.mtime) or 0,
+						})
+					end
+				end
+				if more then
+					tick()
+				else
+					if cached_meta_updated then
+						Library.save_cached_meta()
+					end
+					fin.phase = "sort"
+					tick()
+				end
+				return
+			end
+
+			if fin.phase == "sort" then
+				table.sort(offline, function(a, b)
+					return (a.added_at or 0) > (b.added_at or 0)
+				end)
+				table.sort(cached_tracks, function(a, b)
+					return (a.added_at or 0) > (b.added_at or 0)
+				end)
+				state.offline_tracks = offline
+				state.cached_tracks = cached_tracks
+				fin.phase = "missing"
+				fin.i = 1
+				tick()
+				return
+			end
+
+			if fin.phase == "missing" then
+				local stop = math.min(#cached_tracks, fin.i + AUDIT_CHUNK - 1)
+				while fin.i <= stop do
+					local tr = cached_tracks[fin.i]
+					if not tr.artist or tr.artist == "" or tr.title == tr.id then
+						table.insert(missing_vids, tr.id)
+					end
+					fin.i = fin.i + 1
+				end
+				if fin.i <= #cached_tracks then
+					tick()
+				else
+					if #missing_vids > 0 then
+						Library.resolve_missing_meta(missing_vids)
+					end
+					fin.phase = "prune_offline"
+					fin.key = nil
+					fin.pruned = false
+					tick()
+				end
+				return
+			end
+
+			-- Prune metadata whose audio vanished (e.g. Clear Audio) so the
+			-- persisted file cannot grow stale entries forever.
+			if fin.phase == "prune_offline" then
+				local n = 0
+				local more = true
+				while n < AUDIT_CHUNK do
+					local vid = next(state.offline_meta, fin.key)
+					if vid == nil then
+						more = false
+						break
+					end
+					fin.key = vid
+					n = n + 1
+					if not cached[vid] then
+						state.offline_meta[vid] = nil
+						fin.pruned = true
+					end
+				end
+				if more then
+					tick()
+				else
+					if fin.pruned or meta_added then
+						Library.save_offline_meta()
+					end
+					fin.phase = "prune_cached"
+					fin.key = nil
+					fin.cached_pruned = false
+					tick()
+				end
+				return
+			end
+
+			if fin.phase == "prune_cached" then
+				local n = 0
+				local more = true
+				while n < AUDIT_CHUNK do
+					local vid = next(cached_meta, fin.key)
+					if vid == nil then
+						more = false
+						break
+					end
+					fin.key = vid
+					n = n + 1
+					if not cached[vid] or (state.offline_meta and state.offline_meta[vid]) then
+						cached_meta[vid] = nil
+						fin.cached_pruned = true
+					end
+				end
+				if more then
+					tick()
+				else
+					if fin.cached_pruned then
+						Library.save_cached_meta()
+					end
+
+					state.downloaded_playlist_ids = new_downloaded_playlist_ids
+					log(
+						"audit_downloaded_playlists: "
+							.. done
+							.. " fully downloaded, "
+							.. #offline
+							.. " saved tracks, "
+							.. #cached_tracks
+							.. " cached tracks"
+					)
+					auditing = false
+					store.publish()
+					if audit_pending then
+						audit_pending = false
+						Library.audit_downloaded_playlists()
+					end
+				end
+				return
 			end
 		end
-		if pruned or meta_added then
-			Library.save_offline_meta()
-		end
 
-		local cached_pruned = false
-		for vid in pairs(cached_meta) do
-			if not cached[vid] or (state.offline_meta and state.offline_meta[vid]) then
-				cached_meta[vid] = nil
-				cached_pruned = true
-			end
-		end
-		if cached_pruned then
-			Library.save_cached_meta()
-		end
-
-		state.downloaded_playlist_ids = new_downloaded_playlist_ids
-		log(
-			"audit_downloaded_playlists: "
-				.. done
-				.. " fully downloaded, "
-				.. #offline
-				.. " saved tracks, "
-				.. #cached_tracks
-				.. " cached tracks"
-		)
-		auditing = false
-		store.publish()
-		if audit_pending then
-			audit_pending = false
-			Library.audit_downloaded_playlists()
-		end
+		tick()
 	end
 
 	local function step(idx)
@@ -428,7 +563,7 @@ function Library.audit_downloaded_playlists()
 			finalize()
 			return
 		end
-		noctalia.runAsync("true", function()
+		schedule_audit_tick(function()
 			pcall(function()
 				local tracks = api.load_cached_playlist(sources[idx])
 				if tracks and #tracks > 0 then

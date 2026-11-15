@@ -138,7 +138,13 @@ local function settle(pid)
 	end
 	sync_queue(pid)
 	store.publish()
-	save_cache(pid)
+	-- Persist only once the walk has no continuation left. save_cache()
+	-- JSON-encodes the whole list, and doing that after every page of a large
+	-- playlist burns the 25 ms callback budget for no benefit.
+	local tok = state.playlist.next_token
+	if not tok or tok == "" then
+		save_cache(pid)
+	end
 	ensure_thumbs("playlist")
 end
 
@@ -174,6 +180,7 @@ local function prefetch_more(pid)
 		log("prefetch: page cap " .. PREFETCH_MAX_PAGES .. " reached, stopping and committing the partial list")
 		state.playlist.fetching = false
 		commit_staging(pid)
+		save_cache(pid)
 		settle(pid)
 		return
 	end
@@ -471,6 +478,7 @@ do_fetch = function(pid, fetch_token)
 					log("[" .. mode .. "] duplicate-page cap " .. PREFETCH_MAX_PAGES .. " reached, stopping")
 					state.playlist.fetching = false
 					commit_staging(pid)
+					save_cache(pid)
 					settle(pid)
 					return
 				end
