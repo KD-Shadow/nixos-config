@@ -1,4 +1,4 @@
-{ config, ... }:
+{ pkgs,config,inputs, ... }:
 
 {
   programs.noctalia = {
@@ -395,11 +395,11 @@
         scale = 0.7;
       };
       plugin_settings = {
-        "ashur-d/wallpaper-widget" = {
-          close_on_apply = true;
-          hub_layer = "overlay";
-          hub_position = "bottom_center";
-        };
+        # "ashur-d/wallpaper-widget" = {
+        #   close_on_apply = true;
+        #   hub_layer = "overlay";
+        #   hub_position = "bottom_center";
+        # };
         "noctalia/wallhaven" = {
           browser_open_near_click = true;
           download_dir = "${config.home.homeDirectory}/nixos-config/assets/wallpapers";
@@ -407,13 +407,18 @@
         "yuuto/calculator" = {
           panel_position = "top_right";
         };
+        "ishan0121/wallpaper-deck" = {
+          wallhaven_download_dir = "/home/sh4dow/nixos-config/assets/wallpapers";
+          wallhaven_hires_preview = true;
+          wallpaper_dir = "/home/sh4dow/nixos-config/assets/wallpapers";
+        };
       };
       plugins = {
         auto_update = "official";
         enabled = [
           "noctalia/wallhaven"
           "dotnetrob/cat"
-          "ashur-d/wallpaper-widget"
+          #"ashur-d/wallpaper-widget"
           "aristides/udiskie"
           "alexmnrs/github-activity"
           "theblackdon/theme-switcher"
@@ -423,6 +428,7 @@
           "nirusaki/clearclock" 
           "lepinx/typer"
           "sh4dow/yt-music"
+          "ishan0121/wallpaper-deck"
         ];
         source = [
           {
@@ -508,6 +514,10 @@
               input_path = "${config.home.homeDirectory}/.config/nvim/lua/matugen-template.lua";
               output_path = "${config.home.homeDirectory}/.config/nvim/lua/matugen.lua";
               post_hook = "pkill -SIGUSR1 nvim";
+            };
+             luciole = {
+              input_path = "${inputs.luciole.packages.${pkgs.stdenv.hostPlatform.system}.default}/share/luciole/templates/colors.toml";
+              output_path = "${config.home.homeDirectory}/.config/luciole/colors.toml";
             };
           };
         };
