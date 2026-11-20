@@ -51,6 +51,11 @@
       rm = "rm -iv";
       mkdir = "mkdir -pv";
 
+
+      #fastfetch stuff
+      fft="$HOME/.config/fastfetch/launch.sh";
+      fastfetch="$HOME/.config/fastfetch/launch.sh";
+
       # General
       h = "history";
       j = "jobs -l";
@@ -230,7 +235,8 @@
         du -ah . 2>/dev/null | sort -rh | head -20
       '';
 
-      ff = ''
+      # fzf file picker -> nvim (renamed from ff to avoid clashing with the fastfetch alias)
+      fv = ''
         set query $argv
         set file ""
 

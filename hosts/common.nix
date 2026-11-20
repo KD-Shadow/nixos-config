@@ -90,17 +90,26 @@
       xdg-desktop-portal-wlr
       inputs.strata.packages.${pkgs.stdenv.hostPlatform.system}.default
     ];
-    config.mango = {
-        default = [ "gtk" ];
+    config =
+      let
+        portalBackends = {
+          default = [ "gtk" ];
 
-        "org.freedesktop.impl.portal.FileChooser" = [ "strata" "gtk" ];
-        "org.freedesktop.impl.portal.ScreenCast" = [ "wlr" ];
-        "org.freedesktop.impl.portal.Screenshot" = [ "wlr" ];
+          "org.freedesktop.impl.portal.FileChooser" = [ "strata" "gtk" ];
+          "org.freedesktop.impl.portal.ScreenCast" = [ "wlr" ];
+          "org.freedesktop.impl.portal.Screenshot" = [ "wlr" ];
+        };
+      in {
+        mango = portalBackends;
+        # Umbriel's NixOS module supplies `default = [ "umbriel" "gtk" ]`,
+        # so only the shared backend overrides are set here.
+        umbriel = builtins.removeAttrs portalBackends [ "default" ];
       };
   };
 
   programs.fish.enable = true;
   services.power-profiles-daemon.enable = true;
+  services.upower.enable = true;
   services.udisks2.enable = true;
   services.gvfs.enable = true;
   programs.dconf.enable = true;

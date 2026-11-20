@@ -26,9 +26,10 @@
       url = "github:AlvaroParker/helium-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    luciole.url = "github:noctalia-dev/luciole";
     limusic.url = "path:./apps/limusic";
     strata.url = "path:./apps/strata";
-    # umbriel.url = "github:noctalia-dev/umbriel";
+    umbriel.url = "github:noctalia-dev/umbriel";
   };
 
 
@@ -48,7 +49,6 @@
           extraSpecialArgs = { inherit inputs; };
           users.sh4dow = {
             imports = [
-              # inputs.umbriel.homeModules.default
               ./home/sh4dow
             ];
           };
@@ -58,12 +58,12 @@
       }
       ];
     };
-    nixosConfigurations.sh4dow-niri = nixpkgs.lib.nixosSystem {
+    nixosConfigurations.sh4dow-umbriel = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = { inherit inputs; };
 
       modules = [
-      ./hosts/sh4dow-niri/configuration.nix
+      ./hosts/sh4dow-umbriel/configuration.nix
       home-manager.nixosModules.home-manager
       chaotic.nixosModules.default
       {
@@ -73,8 +73,7 @@
           extraSpecialArgs = { inherit inputs; };
           users.sh4dow = {
             imports = [
-              # inputs.umbriel.homeModules.default
-              ./home/sh4dow/niri-secondary.nix
+              ./home/sh4dow/umbriel-secondary.nix
             ];
           };
 

@@ -46,6 +46,8 @@
       zip 
       unzip
       (mpv.override { scripts = [ mpvScripts.mpris ]; })
+      gum
+      chafa
       lazygit
       libnotify
       zoxide

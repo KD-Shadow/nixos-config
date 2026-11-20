@@ -75,16 +75,16 @@ end
 
 function M.setup()
   local palette = {
-    bg = "#1c100f",
-    bg_container = "#291c1b",
-    bg_high = "#352725",
-    fg = "#f5dddb",
-    fg_bright = "#f5dddb",
-    fg_muted = "#e0bfbc",
-    border = "#a78a87",
-    primary = "#ffb3ae",
-    secondary = "#ffb3ae",
-    tertiary = "#ffb86d",
+    bg = "#17111a",
+    bg_container = "#231d27",
+    bg_high = "#2e2831",
+    fg = "#eadfec",
+    fg_bright = "#eadfec",
+    fg_muted = "#d0c2d5",
+    border = "#998c9e",
+    primary = "#e1b6ff",
+    secondary = "#e1b6ff",
+    tertiary = "#ffafd6",
     error = "#ffb4ab",
     error_container = "#93000a",
   }

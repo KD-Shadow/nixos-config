@@ -438,7 +438,7 @@
         ];
       };
       shell = {
-        app_icon_colorize = false;
+        colorize_icons = false;
         avatar_path = "${config.home.homeDirectory}/nixos-config/assets/Pics/anime(cat,girl).jpg";
         button_borders = false;
         card_borders = false;

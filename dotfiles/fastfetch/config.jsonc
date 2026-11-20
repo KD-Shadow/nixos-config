@@ -1,66 +1,80 @@
 {
   "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
-  "logo": "null",
-  // "logo": {
-  //   "source": "~/nixos-config/dotfiles/fastfetch/rose.txt",
-  //   "padding": {
-  //     "top": 2,
-  //     "right": 6,
-  //   },
-  // },
+  "logo": {
+    "type": "file",
+    "source": "~/.config/fastfetch/themes/ascii/asciiart12.txt",
+    "padding": {
+      "top": 1,
+      "left": 0,
+      "right": 1
+    },
+    "color": {
+      "1": "#e163ff",
+      "2": "#e163ff"
+    }
+  },
   "display": {
-    "separator": " •  ",
+    "separator": " ",
+    "color": {
+      "keys": "#e1b6ff",
+      "title": "#e1b6ff"
+    },
+    "percent": {
+      "color": {
+        "green": "#ffafd6",
+        "yellow": "#e1b6ff",
+        "red": "#ffb4ab"
+      }
+    }
   },
   "modules": [
-    "break",
-    "break",
     {
-      "type": "title",
-      "color": {
-        "user": "32", // = color2
-        "at": "37",
-        "host": "32",
-      },
-    },
-    "break",
-    {
-      "type": "os",
-      "key": "distribution   ",
-      "keyColor": "33",
+      "key": "┏━━━━━━━━┓",
+      "type": "custom"
     },
     {
-      "type": "kernel",
-      "key": "linux kernel   ",
-      "keyColor": "33",
+      "key": "┃ {#34} Os   {#keys}┃",
+      "type": "os"
     },
     {
-      "type": "packages",
-      "format": "{nix-system} (nix-system), {nix-user} (nix-user)",
-      "key": "packages       ",
-      "keyColor": "33",
+      "key": "┃ {#35} ker  {#keys}┃",
+      "type": "command",
+      "text": "uname -r | cut -d'-' -f1"
     },
     {
-      "type": "shell",
-      "key": "unix shell     ",
-      "keyColor": "33",
-    },
-    {
-      "type": "terminal",
-      "key": "terminal       ",
-      "keyColor": "33",
-    },
-    {
+      "key": "┃ {#36} wm   {#keys}┃",
       "type": "wm",
-      "format": "{} ({3})",
-      "key": "window manager ",
-      "keyColor": "33",
+      "format": "{1}"
     },
-    "break",
     {
-      "type": "colors",
-      "symbol": "circle",
+      "key": "┃ {#31} term {#keys}┃",
+      "type": "terminal",
+      "format": "{1}"
     },
-    "break",
-    "break",
-  ],
+    {
+      "key": "┃ {#31} shll {#keys}┃",
+      "type": "shell",
+      "format": "{1}"
+    },
+    {
+      "key": "┃ {#33}󰞌 up   {#keys}┃",
+      "type": "uptime"
+    },
+    {
+      "key": "┃ {#32} Age  {#keys}┃",
+      "type": "command",
+      "text": "echo $(( ($(date +%s) - $(stat -c %W / 2>/dev/null || stat -c %Y /)) / 86400 )) days"
+    },
+    {
+      "key": "┃ {#36}󰟜 mem  {#keys}┃",
+      "type": "memory",
+      "percent": {
+        "type": 8
+      }
+    },
+    {
+      "key": "┗━━━━━━━━┛",
+      "type": "custom"
+    }
+  ]
 }
