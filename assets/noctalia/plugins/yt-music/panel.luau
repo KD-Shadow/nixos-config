@@ -14,6 +14,7 @@ local settings_comp = require("./views/components/settings.luau")
 local offline_comp = require("./views/components/offline.luau")
 local artist_comp = require("./views/components/artist.luau")
 local library_comp = require("./views/components/library.luau")
+local addtoplaylist_comp = require("./views/components/addtoplaylist.luau")
 
 theme.corner_radius_scale = noctalia.getSetting("shell.corner_radius_scale") or 1.0
 theme.radius = 12 * theme.corner_radius_scale
@@ -29,6 +30,7 @@ local function build_content()
 		offline = offline_comp.build,
 		artist = artist_comp.build,
 		library = library_comp.build,
+		add_to_playlist = addtoplaylist_comp.build,
 	}
 
 	local builder = page_builders[state.view.content_page]

@@ -20,6 +20,9 @@ local view = {
 	offline_filter = "all",
 	playlist_text_filter = "",
 	settings_tab = "cache",
+	add_to_playlist_track = nil,
+	add_to_playlist_return = "home",
+	add_to_playlist_filter = "",
 	loading_track_id = nil,
 	expanded_track_id = nil,
 	expanded_row_key = nil,
@@ -197,6 +200,38 @@ end
 
 local function play_playlist(pl)
 	request("play_playlist", { id = pl.id, title = pl.title })
+end
+
+-- Add-to-playlist picker: the full panel has no back stack, so remember which
+-- page we came from and restore it on close/cancel.
+local function open_add_to_playlist(item)
+	if not item or not item.id or item.id == "" then
+		return
+	end
+	collapse_track()
+	if view.content_page ~= "add_to_playlist" then
+		view.add_to_playlist_return = view.content_page
+	end
+	view.add_to_playlist_track = {
+		id = item.id,
+		title = item.title or "Track",
+		artist = item.artist or "",
+		thumbnail_url = item.thumbnail_url or "",
+		thumb_path = item.thumb_path or nil,
+	}
+	view.add_to_playlist_filter = ""
+	view.content_page = "add_to_playlist"
+	if #data.library == 0 then
+		request("refresh_library")
+	end
+	rerender.call()
+end
+
+local function close_add_to_playlist()
+	view.add_to_playlist_track = nil
+	view.add_to_playlist_filter = ""
+	view.content_page = view.add_to_playlist_return or "home"
+	rerender.call()
 end
 
 local function open_artist(a)
@@ -381,6 +416,7 @@ local function open_track_context_menu(item)
 		{ id = "play", label = "Play now" },
 		{ id = "play_next", label = "Play next" },
 		{ id = "add_queue", label = "Add to queue" },
+		{ id = "add_to_playlist", label = "Add to playlist" },
 		{ kind = "separator" },
 		{ id = "toggle_like", label = is_liked and "Remove from Liked" or "Add to Liked" },
 		{
@@ -414,6 +450,8 @@ local function execute_track_action(action_id, track)
 		request("play_next", { item = track })
 	elseif action_id == "add_queue" then
 		request("add_to_queue", { item = track })
+	elseif action_id == "add_to_playlist" then
+		open_add_to_playlist(track)
 	elseif action_id == "toggle_like" then
 		request("toggle_like", { id = track.id, item = track })
 	elseif action_id == "download" then
@@ -452,6 +490,8 @@ return {
 	open_artist = open_artist,
 	play_item = play_item,
 	play_playlist = play_playlist,
+	open_add_to_playlist = open_add_to_playlist,
+	close_add_to_playlist = close_add_to_playlist,
 	hover_update = hover_update,
 	track_hover = track_hover,
 	open_track_context_menu = open_track_context_menu,

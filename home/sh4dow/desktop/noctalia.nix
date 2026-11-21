@@ -515,10 +515,6 @@
               output_path = "${config.home.homeDirectory}/.config/nvim/lua/matugen.lua";
               post_hook = "pkill -SIGUSR1 nvim";
             };
-             luciole = {
-              input_path = "${inputs.luciole.packages.${pkgs.stdenv.hostPlatform.system}.default}/share/luciole/templates/colors.toml";
-              output_path = "${config.home.homeDirectory}/.config/luciole/colors.toml";
-            };
           };
         };
       };

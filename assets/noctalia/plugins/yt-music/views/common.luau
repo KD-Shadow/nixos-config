@@ -198,6 +198,21 @@ local function track_actions(item, row_key, trailing)
 		end,
 	})
 
+	local addpl_button = ui.button({
+		key = row_key .. "-addpl",
+		glyph = "library-plus",
+		variant = "ghost",
+		controlSize = "sm",
+		tooltip = "Add to playlist",
+		visible = is_expanded,
+		onClick = function()
+			state.open_add_to_playlist(item)
+		end,
+		onHover = function(h)
+			state.track_hover(h, row_key, "addpl", item)
+		end,
+	})
+
 	local like_button = ui.button({
 		key = row_key .. "-like",
 		glyph = "heart",
@@ -275,6 +290,7 @@ local function track_actions(item, row_key, trailing)
 		trailing_row,
 		addqueue_button,
 		playnext_button,
+		addpl_button,
 		like_button,
 		dl_button,
 		copy_button,

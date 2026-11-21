@@ -2,6 +2,7 @@ local API = {}
 
 local REQUIRED_MODULES = {
 	"./api/autoplay.luau",
+	"./api/addtoplaylist.luau",
 	"./api/search.luau",
 	"./api/stats.luau",
 	"./api/thumbnails.luau",

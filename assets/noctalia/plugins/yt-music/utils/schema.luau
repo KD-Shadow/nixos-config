@@ -48,6 +48,10 @@ local function new()
 		refreshing_library = false,
 		refreshing_cache_stats = false,
 		cache_stats = {},
+		playlist_add_pending = false,
+		playlist_add_status = "",
+		playlist_add_ok = false,
+		playlist_add_video_id = "",
 		settings = { autoplay = true },
 		system_radius = nil,
 	}

@@ -59,6 +59,11 @@ session. Audio is decoded via `yt-dlp`'s best-audio format; with a YouTube
 Premium account you get the higher-quality 256 kbps Opus streams where
 available.
 
+To add a track to one of your playlists, open its hover actions or right-click
+menu and choose **Add to playlist**, then pick a playlist from the list. The
+list comes from your library (refresh it there if a newly created playlist is
+missing), and re-adding a track is a no-op.
+
 ### Offline
 
 Download individual tracks or entire playlists for offline playback. Audio,

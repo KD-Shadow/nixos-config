@@ -106,6 +106,34 @@ local ACTIONS = {
 	refresh_playlist = function(r)
 		playlist.refresh(r.id or r.playlist_id)
 	end,
+	add_to_playlist = function(r)
+		local vid = tostring((r and r.video_id) or (r.item and r.item.id) or "")
+		local pid = tostring((r and r.playlist_id) or "")
+		if vid == "" or pid == "" then
+			return
+		end
+		local title = tostring((r and r.title) or "track")
+		local pl_title = tostring((r and r.playlist_title) or "playlist")
+		state.playlist_add_pending = true
+		state.playlist_add_video_id = vid
+		state.playlist_add_status = "Adding “" .. title .. "” to " .. pl_title .. "…"
+		store.publish()
+		api.add_to_playlist(vid, pid, function(ok, detail)
+			state.playlist_add_pending = false
+			state.playlist_add_ok = ok == true
+			state.playlist_add_status = ok
+					and ("Added “" .. title .. "” to " .. pl_title)
+				or ("Could not add to " .. pl_title .. ": " .. tostring(detail or "failed"))
+			-- The next open of this playlist must show the newly added track.
+			if ok and api.invalidate_playlist_cache then
+				api.invalidate_playlist_cache(pid)
+			end
+			if noctalia.notify then
+				noctalia.notify("YouTube Music", state.playlist_add_status)
+			end
+			store.publish()
+		end)
+	end,
 	refresh_library = function(r)
 		if not network.isOnline() then
 			log("refresh_library: skipped because offline")
