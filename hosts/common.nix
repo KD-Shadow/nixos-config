@@ -51,10 +51,21 @@
     };
   };
 
-  nix.settings.experimental-features = [
-    "nix-command"
-    "flakes"
-  ];
+  nix.settings = {
+    experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
+
+    # Persistent on the installed system: flake.nix's nixConfig is only used
+    # when accept-flake-config is enabled, which is not the case by default.
+    extra-substituters = [
+      "https://noctalia.cachix.org"
+    ];
+    extra-trusted-public-keys = [
+      "noctalia.cachix.org-1:pCOR47nnMEo5thcxNDtzWpOxNFQsBRglJzxWPp3dkU4="
+    ];
+  };
 
   nixpkgs.config.allowUnfree = true;
 

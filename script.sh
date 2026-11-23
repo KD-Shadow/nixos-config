@@ -2,16 +2,98 @@
 set -euo pipefail
 
 REPO_URL="https://github.com/KD-Shadow/nixos-config.git"
-HOST="sh4dow-nixos"
 USER_NAME="sh4dow"
 USER_GROUP="users"
 REPO_DIR="/mnt/home/$USER_NAME/nixos-config"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd -P || true)"
 
 log() { printf '\n\033[1;34m==>\033[0m %s\n' "$*"; }
 die() {
-  printf '\033[1;31mERROR:\033[0m %s\n' "$*" >&2
+  printf '\033[1;31mERROR:\033[0m %b\n' "$*" >&2
   exit 1
 }
+
+HOSTS=()
+if [[ -n $SCRIPT_DIR && -d $SCRIPT_DIR/hosts ]]; then
+  while IFS= read -r host_dir; do
+    [[ -f "$host_dir/configuration.nix" ]] && HOSTS+=("$(basename "$host_dir")")
+  done < <(find "$SCRIPT_DIR/hosts" -mindepth 1 -maxdepth 1 -type d | sort)
+fi
+(( ${#HOSTS[@]} > 0 )) || die "no hosts found under ${SCRIPT_DIR:-<script dir>}/hosts"
+
+usage() {
+  cat <<EOF
+Usage: sudo $0 [--host <name>] [<name>]
+
+Available hosts:
+$(printf '  %s\n' "${HOSTS[@]}")
+
+You can also select non-interactively:
+  sudo env HOST=${HOSTS[0]} $0
+  sudo $0 --host ${HOSTS[0]}
+
+With no host argument, this script shows a numbered menu.
+EOF
+}
+
+is_known_host() {
+  local candidate
+  for candidate in "${HOSTS[@]}"; do
+    [[ $candidate == "$1" ]] && return 0
+  done
+  return 1
+}
+
+HOST="${HOST:-}"
+while (($# > 0)); do
+  case "$1" in
+    -h | --help)
+      usage
+      exit 0
+      ;;
+    --list-hosts)
+      printf '%s\n' "${HOSTS[@]}"
+      exit 0
+      ;;
+    --host)
+      shift
+      (($# > 0)) || die "--host requires a value"
+      HOST="$1"
+      ;;
+    --host=*)
+      HOST="${1#--host=}"
+      ;;
+    -*)
+      die "unknown option: $1\n\n$(usage)"
+      ;;
+    *)
+      [[ -z $HOST ]] || die "host specified more than once\n\n$(usage)"
+      HOST="$1"
+      ;;
+  esac
+  shift
+done
+
+if [[ -z $HOST ]]; then
+  if [[ ! -t 0 ]]; then
+    die "no host selected and no TTY available\n\n$(usage)"
+  fi
+  echo
+  echo "Select host to install:"
+  local_i=1
+  for host in "${HOSTS[@]}"; do
+    printf '  %d) %s\n' "$local_i" "$host"
+    local_i=$((local_i + 1))
+  done
+  read -rp "Host [1-${#HOSTS[@]}]: " choice
+  [[ $choice =~ ^[0-9]+$ ]] || die "invalid host selection: $choice"
+  (( 10#$choice >= 1 && 10#$choice <= ${#HOSTS[@]} )) || die "invalid host selection: $choice"
+  HOST="${HOSTS[10#$choice - 1]}"
+else
+  is_known_host "$HOST" || die "unknown host '$HOST'\n\n$(usage)"
+fi
+
+log "Selected host: $HOST"
 
 [[ $EUID -eq 0 ]] || die "run as root (sudo -i)"
 mountpoint -q /mnt || die "/mnt is not a mountpoint - mount your target root first"
@@ -43,7 +125,6 @@ if ! command -v git >/dev/null; then
 fi
 
 # Figure out whether this script lives inside a git checkout of the repo
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd -P || true)"
 SRC_REPO=""
 if [[ -n $SCRIPT_DIR ]]; then
   SRC_REPO="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel 2>/dev/null || true)"

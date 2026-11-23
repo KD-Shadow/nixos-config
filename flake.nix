@@ -1,6 +1,18 @@
 {
   description= " My NixOs Configuration";
 
+  # Only honoured when `accept-flake-config = true` (script.sh sets this for
+  # installs). The system also sets these in hosts/common.nix so rebuilds on an
+  # installed machine get the Noctalia cache regardless of that setting.
+  nixConfig = {
+    extra-substituters = [
+      "https://noctalia.cachix.org"
+    ];
+    extra-trusted-public-keys = [
+      "noctalia.cachix.org-1:pCOR47nnMEo5thcxNDtzWpOxNFQsBRglJzxWPp3dkU4="
+    ];
+  };
+
   inputs={
     nixpkgs.url="github:nixos/nixpkgs/nixos-unstable";
 
