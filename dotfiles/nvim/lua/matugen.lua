@@ -75,20 +75,6 @@ end
 
 function M.setup()
   local palette = {
-<<<<<<< HEAD
-    bg = "#15121c",
-    bg_container = "#211e29",
-    bg_high = "#2b2833",
-    fg = "#e7e0ef",
-    fg_bright = "#e7e0ef",
-    fg_muted = "#cbc3d8",
-    border = "#948ea2",
-    primary = "#cebdff",
-    secondary = "#cebdff",
-    tertiary = "#ffacec",
-    error = "#ffb4ab",
-    error_container = "#93000a",
-=======
     bg = "#0a0a12",
     bg_container = "#14141e",
     bg_high = "#1c1c2a",
@@ -101,7 +87,6 @@ function M.setup()
     tertiary = "#9a7398",
     error = "#c25b5b",
     error_container = "#412227",
->>>>>>> 010f8dd (wall)
   }
 
   local syn = {
