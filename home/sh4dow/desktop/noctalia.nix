@@ -9,13 +9,13 @@
         ui_scale = 0.95;
       };
       bar = {
-        order = [ "Sh4dow" "default" ];
+        order = [ "Sh4dow" "default" "Pill" ];
         Sh4dow = {
           background_opacity = 0.9;
           border = "on_primary";
           center = [ "activity_2" "clock" "bar" ];
-          enabled = true;
-          end = [ "media" "tray" "cpu" "notifications" "network" "volume" "widget" ];
+          enabled = false;
+          end = [ "tray" "cpu" "notifications" "network" "volume" "widget" ];
           font_family = "JetBrainsMono NFM";
           margin_edge = 0;
           margin_ends = 0;
@@ -76,6 +76,20 @@
               widget_spacing = 10;
             }
           ];
+        };
+        Pill = {
+          capsule_thickness = 0.73999998718500137;
+          concave_edge_corners = false;
+          enabled = true;
+          end = [ "network" ];
+          margin_edge = 2;
+          margin_ends = 500;
+          padding = 17;
+          radius = 0;
+          reserve_space = false;
+          scale = 0.7500000037252903;
+          smart_auto_hide = true;
+          start = [ "workspaces" "media" ];
         };
       };
       calendar = {
@@ -395,11 +409,11 @@
         scale = 0.7;
       };
       plugin_settings = {
-        # "ashur-d/wallpaper-widget" = {
-        #   close_on_apply = true;
-        #   hub_layer = "overlay";
-        #   hub_position = "bottom_center";
-        # };
+        "ashur-d/wallpaper-widget" = {
+          close_on_apply = true;
+          hub_layer = "overlay";
+          hub_position = "bottom_center";
+        };
         "noctalia/wallhaven" = {
           browser_open_near_click = true;
           download_dir = "${config.home.homeDirectory}/nixos-config/assets/wallpapers";
@@ -407,18 +421,13 @@
         "yuuto/calculator" = {
           panel_position = "top_right";
         };
-        "ishan0121/wallpaper-deck" = {
-          wallhaven_download_dir = "/home/sh4dow/nixos-config/assets/wallpapers";
-          wallhaven_hires_preview = true;
-          wallpaper_dir = "/home/sh4dow/nixos-config/assets/wallpapers";
-        };
       };
       plugins = {
         auto_update = "official";
         enabled = [
           "noctalia/wallhaven"
           "dotnetrob/cat"
-          #"ashur-d/wallpaper-widget"
+          "ashur-d/wallpaper-widget"
           "aristides/udiskie"
           "alexmnrs/github-activity"
           "theblackdon/theme-switcher"
@@ -428,7 +437,6 @@
           "nirusaki/clearclock" 
           "lepinx/typer"
           "sh4dow/yt-music"
-          "ishan0121/wallpaper-deck"
         ];
         source = [
           {
@@ -451,7 +459,7 @@
         corner_radius_scale = 2.0;
         font_family = "JetBrainsMono NFM";
         input_borders = false;
-        panel_anchor_bar = "Sh4dow";
+        panel_anchor_bar = "Pill";
         polkit_agent = true;
         popup_borders = false;
         settings_show_advanced = true;
@@ -463,8 +471,12 @@
         panel = {
           borders = false;
           clipboard_placement = "attached";
+          control_center_placement = "floating";
+          control_center_position = "center";
           launcher_placement = "attached";
           polkit_placement = "attached";
+          wallpaper_placement = "floating";
+          wallpaper_position = "center";
           transparency_mode = "glass";
         };
         screen_corners = {
@@ -487,6 +499,7 @@
             "libreoffice"
             "neovim"
             "zed"
+            "umbriel"
             "fastfetch"
             "zathura"
             "bat"
@@ -576,9 +589,6 @@
     };
   };
 
-  # Locally patched YouTube Music plugin (cookie header fix + endless play).
-  # Placed in Noctalia's built-in local plugin source so community updates
-  # cannot overwrite it. Symlinked from the repo for easy editing.
   xdg.dataFile."noctalia/plugins/yt-music".source =
     config.lib.file.mkOutOfStoreSymlink
       "${config.home.homeDirectory}/nixos-config/assets/noctalia/plugins/yt-music";

@@ -127,10 +127,38 @@ function EXPO.invalidate_stream(video_id: string)
 	noctalia.removeFile(STREAMS_CACHE_DIR .. "/" .. safe_id .. ".url")
 end
 
-function EXPO.resolve_stream(video_id: string, cb: ((string?) -> ())?)
+-- Failure detail passed as the second callback argument so the player can show
+-- (and log) why yt-dlp produced no URL instead of a bare "failed".
+local function failure_reason(res: any?, out: string): string
+	local reason = "failed"
+	if out:find("NETGATE=OFFLINE", 1, true) then
+		return "offline"
+	end
+	if type(res) == "table" then
+		if res.timedOut then
+			reason = "timed out"
+		elseif res.exitCode == 143 or res.exitCode == 137 then
+			-- SIGTERM/SIGKILL is our own supersede kill reaping a stale fetch.
+			return "superseded (stale fetch reaped)"
+		end
+	end
+	-- yt-dlp prints its actionable error to stderr. Keep one bounded line.
+	local stderr = type(res) == "table" and tostring(res.stderr or "") or ""
+	local detail = stderr:match("[^\r\n]*ERROR:[^\r\n]*") or stderr:match("[^\r\n]+")
+	if not detail or detail == "" then
+		detail = out:gsub("[\r\n]", " ")
+	end
+	detail = sanitize_str(detail or "")
+	if #detail > 200 then
+		detail = detail:sub(#detail - 199)
+	end
+	return detail ~= "" and (reason .. ": " .. detail) or reason
+end
+
+function EXPO.resolve_stream(video_id: string, cb: ((string?, string?) -> ())?)
 	if type(video_id) ~= "string" or video_id == "" then
 		if cb then
-			cb(nil)
+			cb(nil, "invalid id")
 		end
 		return
 	end
@@ -217,20 +245,11 @@ attempt_resolve = function(video_id, attempt)
 				end
 			end
 		else
-			local reason = "failed"
-			if out:find("NETGATE=OFFLINE", 1, true) then
-				reason = "offline, deferred"
-			elseif type(res) == "table" and res.timedOut then
-				reason = "timed out"
-			elseif type(res) == "table" and (res.exitCode == 143 or res.exitCode == 137) then
-				-- SIGTERM/SIGKILL is our own supersede kill reaping a stale
-				-- fetch during rapid skips — expected, not an error.
-				reason = "superseded (stale fetch reaped)"
-			end
-			log("stream resolution " .. reason .. " (" .. elapsed_ms .. "ms) for id=" .. video_id)
+			local reason = failure_reason(res, out)
+			log("stream resolution failed (" .. elapsed_ms .. "ms) for id=" .. video_id .. ": " .. reason)
 			for _, callback in ipairs(callbacks) do
 				if callback then
-					callback(nil)
+					callback(nil, reason)
 				end
 			end
 		end
@@ -258,7 +277,7 @@ attempt_resolve = function(video_id, attempt)
 		resolving_in_flight[video_id] = nil
 		for _, callback in ipairs(pending) do
 			if callback then
-				callback(nil)
+				callback(nil, "launch refused")
 			end
 		end
 	end

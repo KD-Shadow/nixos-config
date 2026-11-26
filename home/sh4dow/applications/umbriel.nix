@@ -1,63 +1,11 @@
-{ inputs, pkgs, ... }:
+{ inputs, ... }:
 
-let
-  umbrielBin = "${inputs.umbriel.packages.${pkgs.stdenv.hostPlatform.system}.default}/bin/umbriel";
-  jqBin = "${pkgs.jq}/bin/jq";
-
-  # https://docs.noctalia.dev/umbriel/streaming/
-  sunshineOutputScript = pkgs.writeShellScript "umbriel-output.sh" ''
-    set -eu
-
-    name=sunshine
-
-    case "$1" in
-      create)
-        ${umbrielBin} output-destroy "$name" >/dev/null 2>&1 || true
-        ${umbrielBin} output-create "$name" \
-          "''${SUNSHINE_CLIENT_WIDTH:-1920}x''${SUNSHINE_CLIENT_HEIGHT:-1080}@''${SUNSHINE_CLIENT_FPS:-60}" >/dev/null
-        ;;
-      remove)
-        # Give the app's undo command up to 5 seconds to close its windows so
-        # they do not flash onto a physical monitor.
-        i=0
-        while [ "$i" -lt 25 ]; do
-          left="$(${umbrielBin} windows --json | ${jqBin} --arg out "$name:" \
-            '[.[] | select(.workspace | startswith($out))] | length')"
-          [ "$left" = 0 ] && break
-          sleep 0.2
-          i=$((i + 1))
-        done
-
-        # Move leftovers off the streamed output so they do not come back to
-        # every future session when the output is recreated.
-        target="$(${umbrielBin} workspaces --json | ${jqBin} -r --arg out "$name" \
-          '[.[] | select(.output != $out and .active)]
-           | (map(select(.focused)) + .) | first | "\(.name)/\(.output)" // empty')"
-        for id in $(${umbrielBin} windows --json | ${jqBin} -r --arg out "$name:" \
-          '.[] | select(.workspace | startswith($out)) | .id'); do
-          [ -n "$target" ] || break
-          ${umbrielBin} msg window-focus "$id"
-          ${umbrielBin} msg window-move-to-workspace-silent "$target"
-        done
-
-        ${umbrielBin} output-destroy "$name" >/dev/null 2>&1 || true
-        ;;
-    esac
-  '';
-in
 {
   imports = [ inputs.umbriel.homeModules.default ];
-
-  # Consumed by services.sunshine.global_prep_cmd in hosts/sh4dow-umbriel.
-  xdg.configFile."sunshine/umbriel-output.sh" = {
-    source = sunshineOutputScript;
-    executable = true;
-  };
 
   programs.umbriel = {
     enable = true;
     settings = {
-      # Ported from dotfiles/mango/mango-config/env.conf.
       environment = {
         GTK_IM_MODULE = "fcitx";
         QT_IM_MODULE = "fcitx";
@@ -71,7 +19,6 @@ in
       };
 
       general = {
-        # Noctalia is started by its systemd user service (see desktop/noctalia.nix).
         mod_key = "Super";
         xwayland = true;
         xwayland_native_resolution = false;
@@ -90,7 +37,6 @@ in
           hide_timeout_ms = 0;
         };
 
-        # From mango's repeat_rate/repeat_delay/numlock_on/xkb_rules_options.
         keyboard = {
           repeat_rate = 25;
           repeat_delay = 600;
@@ -98,7 +44,6 @@ in
           options = "caps:escape";
         };
 
-        # mango: sloppy_focus = 1.
         focus.follows_mouse = "sloppy";
       };
 
@@ -107,45 +52,94 @@ in
         "Mod+Shift+R" = "config-reload";
 
         # Applications
-        "Mod+Return" = "spawn alacritty";
+        "Mod+Return" = "spawn ghostty";
         "Mod+Shift+Return" = "spawn ghostty --title=ghostty-float";
+        "Mod+F" = "spawn ghostty -e superfile";
+        "Mod+Alt+N" = "spawn neovide";
+        "Mod+Shift+T" = "spawn ghostty --title=ghostty-cliamp -e smassh";
         "Mod+B" = "spawn firefox";
         "Mod+E" = "spawn strata";
-        "Mod+F" = "spawn superfile";
 
         # Power
         "Mod+Alt+Ctrl+P" = "spawn systemctl poweroff";
         "Mod+Alt+Ctrl+R" = "spawn systemctl reboot";
 
-        # Windows
+        # Window focus
         "Mod+Q" = "window-close";
+        "Mod+Tab" = "window-focus-next";
         "Mod+U" = "window-focus-last";
         "Alt+Left" = "window-focus-left";
         "Alt+Right" = "window-focus-right";
         "Alt+Up" = "window-focus-up";
         "Alt+Down" = "window-focus-down";
-        "Alt+F" = "window-toggle-fullscreen";
-        "Alt+A" = "window-toggle-floating";
-        "Alt+Z" = "window-toggle-scratchpad";
-        "Mod+I" = "overview-toggle";
-        "Mod+O" = "overview-toggle";
+        "Alt+H" = "window-focus-left";
+        "Alt+J" = "window-focus-down";
+        "Alt+K" = "window-focus-up";
+        "Alt+L" = "window-focus-right";
 
-        # From mango's exchange/resize/move binds.
-        "Mod+Shift+Up" = "window-move-up";
-        "Mod+Shift+Down" = "window-move-down";
+        # exchange_client
+        "Mod+Shift+Up" = "window-swap-up";
+        "Mod+Shift+Down" = "window-swap-down";
+        "Mod+Shift+Left" = "window-swap-left";
+        "Mod+Shift+Right" = "window-swap-right";
+
+        # movewin (logical pixels)
         "Ctrl+Shift+Up" = "window-move-by 0 -50";
         "Ctrl+Shift+Down" = "window-move-by 0 +50";
         "Ctrl+Shift+Left" = "window-move-by -50 +0";
         "Ctrl+Shift+Right" = "window-move-by +50 +0";
+
+        # resizewin (fractions of the usable area)
+        "Ctrl+Alt+K" = "window-modify-height-down -0.02";
+        "Ctrl+Alt+J" = "window-modify-height-down +0.02";
         "Ctrl+Alt+H" = "window-modify-width-left -0.02";
         "Ctrl+Alt+L" = "window-modify-width-right +0.02";
-        "Mod+G" = "workspace-toggle-show-desktop";
 
-        # Workspaces
+        # Window states. Umbriel's pinned state covers both mango's global
+        # (all tags) and overlay (always on top) states.
+        "Mod+G" = "window-toggle-pinned";
+        "Alt+Tab" = "overview-toggle";
+        "Alt+A" = "window-toggle-floating";
+        "Alt+F" = "window-toggle-fullscreen";
+        "Alt+Shift+F" = "window-toggle-maximize-to-edges";
+        "Mod+I" = "window-minimize";
+        "Mod+Shift+I" = "window-restore-minimized";
+        "Mod+O" = "window-toggle-pinned";
+        "Alt+Z" = "window-toggle-scratchpad";
+
+        # Scroller layout proportions
+        "Alt+E" = "window-set-primary-extent 1.0";
+        "Alt+X" = "window-cycle-primary-extent";
+
+        # Tile layout. Mango's zoom swaps with the master; Umbriel has no
+        # targeted master swap, so step toward it in layout order.
+        "Mod+Shift+E" = "layout-master-count-increase";
+        "Alt+S" = "window-swap-previous";
+
+        # Layout switching: mango tile/scroller are Umbriel master/scrolling.
+        "Mod+N" = "workspace-set-layout toggle scrolling master";
+        "Ctrl+Mod+I" = "workspace-set-layout master";
+        "Ctrl+Mod+L" = "workspace-set-layout scrolling";
+
         "Mod+Left" = "workspace-previous";
         "Mod+Right" = "workspace-next";
-        "Mod+Shift+Left" = "column-move-to-workspace-previous";
-        "Mod+Shift+Right" = "column-move-to-workspace-next";
+        "Ctrl+Left" = "workspace-previous";
+        "Ctrl+Right" = "workspace-next";
+
+        # Move window to workspace (mango tagtoleft/tagtoright and toggletag).
+        "Ctrl+Mod+Left" = "window-move-to-workspace-previous";
+        "Ctrl+Mod+Right" = "window-move-to-workspace-next";
+        "Ctrl+Mod+1" = "window-move-to-workspace-silent 1";
+        "Ctrl+Mod+2" = "window-move-to-workspace-silent 2";
+        "Ctrl+Mod+3" = "window-move-to-workspace-silent 3";
+        "Ctrl+Mod+4" = "window-move-to-workspace-silent 4";
+        "Ctrl+Mod+5" = "window-move-to-workspace-silent 5";
+        "Ctrl+Mod+6" = "window-move-to-workspace-silent 6";
+        "Ctrl+Mod+7" = "window-move-to-workspace-silent 7";
+        "Ctrl+Mod+8" = "window-move-to-workspace-silent 8";
+        "Ctrl+Mod+9" = "window-move-to-workspace-silent 9";
+
+        # Direct workspace
         "Mod+1" = "workspace-switch 1";
         "Mod+2" = "workspace-switch 2";
         "Mod+3" = "workspace-switch 3";
@@ -155,20 +149,6 @@ in
         "Mod+7" = "workspace-switch 7";
         "Mod+8" = "workspace-switch 8";
         "Mod+9" = "workspace-switch 9";
-        "Mod+Shift+1" = "window-move-to-workspace-silent 1";
-        "Mod+Shift+2" = "window-move-to-workspace-silent 2";
-        "Mod+Shift+3" = "window-move-to-workspace-silent 3";
-        "Mod+Shift+4" = "window-move-to-workspace-silent 4";
-        "Mod+Shift+5" = "window-move-to-workspace-silent 5";
-        "Mod+Shift+6" = "window-move-to-workspace-silent 6";
-        "Mod+Shift+7" = "window-move-to-workspace-silent 7";
-        "Mod+Shift+8" = "window-move-to-workspace-silent 8";
-        "Mod+Shift+9" = "window-move-to-workspace-silent 9";
-
-        # Layout switching (mango's switch_layout / setlayout binds).
-        "Mod+N" = "workspace-set-layout toggle scrolling master";
-        "Ctrl+Mod+I" = "workspace-set-layout scrolling";
-        "Ctrl+Mod+L" = "workspace-set-layout master";
 
         # Monitor focus/movement (mango focusmon / tagmon).
         "Alt+Shift+Left" = "output-focus-left";
@@ -198,11 +178,9 @@ in
         "Mod+Comma" = "spawn noctalia msg settings-toggle";
         "Mod+Space" = "spawn noctalia msg panel-toggle launcher";
         "Mod+V" = "spawn noctalia msg panel-toggle clipboard";
-        "Mod+W" = "spawn noctalia msg panel-toggle wallpaper";
-        "Mod+Shift+W" = "spawn noctalia msg panel-toggle ishan0121/wallpaper-deck:picker";
-        "Mod+P" = "spawn noctalia msg screenshot-region";
+        "Mod+W" = "spawn noctalia msg panel-toggle ashur-d/wallpaper-widget:hub";
         "Mod+Alt+S" = "spawn noctalia msg screenshot-region";
-        "Mod+S" = "spawn noctalia msg panel-toggle control-center";
+        "Mod+S" = "spawn noctalia msg panel-toggle control-center [tab]";
         "Mod+Escape" = "spawn noctalia msg panel-toggle session";
         "Mod+L" = "spawn noctalia msg session lock";
         "Mod+Shift+Tab" = "spawn noctalia msg window-switcher";
@@ -214,10 +192,21 @@ in
         "Mod+Shift+M" = "spawn noctalia msg plugin sh4dow/yt-music:service all toggle";
         "Mod+Alt+W" = "spawn noctalia msg panel-toggle noctalia/wallhaven:browser";
         "Mod+Alt+Space" = "spawn noctalia msg panel-toggle theblackdon/theme-switcher:carousel";
+
+        "Alt+MouseMiddle" = "window-set-primary-extent 0.5";
+        "Mod+Ctrl+MouseLeft" = "window-minimize";
+        "Mod+Ctrl+MouseRight" = "window-close";
+        "Mod+Ctrl+MouseMiddle" = "window-toggle-fullscreen";
+
+        "Mod+WheelUp" = { action = "workspace-previous"; cooldown_ms = 150; };
+        "Mod+WheelDown" = { action = "workspace-next"; cooldown_ms = 150; };
+        "Alt+WheelUp" = "window-focus-left";
+        "Alt+WheelDown" = "window-focus-right";
+        "Mod+Shift+WheelUp" = "window-swap-left";
+        "Mod+Shift+WheelDown" = "window-swap-right";
+
       };
 
-      # Mango used scrolling + tile tags; Umbriel's scrolling layout is the
-      # closest tiling equivalent. Gaps and extents come from animations.conf.
       layout = {
         mode = "scrolling";
         gap = 5;
@@ -231,7 +220,7 @@ in
 
       appearance = {
         prefer_no_csd = true;
-        border_width = 1;
+        border_width = 0;
         outer_border_width = 0;
         corner_radius = 10;
         drag_opacity = 0.8;
@@ -261,7 +250,6 @@ in
           noise = 0.05;
           brightness = 0.9;
           contrast = 0.9;
-          # Mango used 3, but Umbriel caps saturation at 2.
           saturation = 2.0;
         };
 
@@ -273,8 +261,6 @@ in
         };
       };
 
-      # Timings mapped from mango's animation_duration_* values. Umbriel does
-      # not accept mango's non-monotonic Bezier curves, so use its own easing.
       animation = {
         enabled = true;
         duration_ms = 400;
@@ -310,8 +296,6 @@ in
         layers.enabled = true;
       };
 
-      # From dotfiles/mango/mango-config/rule.conf, plus the Noctalia layer
-      # blur rules and the streaming rules from the Umbriel docs.
       window_rule = [
         {
           match.is_focused = true;
@@ -329,8 +313,9 @@ in
         {
           match.app_id = "^firefox$";
           default_workspace = 3;
+          default_maximize_to_edges = true;
           match.is_focused = true;
-          opacity = 0.95;
+          opacity = 1.0;
         }
         {
           match.app_id = "^limusic$";
@@ -363,18 +348,6 @@ in
           default_floating_size_px = { width = 700; height = 700; };
         }
 
-        # https://docs.noctalia.dev/umbriel/streaming/
-        {
-          match.app_id = "^steam$";
-          match.title = "[Bb]ig [Pp]icture";
-          default_output = "sunshine";
-          default_fullscreen = true;
-        }
-        {
-          match.app_id = "^steam_app_";
-          default_output = "sunshine";
-          confine_pointer = true;
-        }
       ];
 
       layer_rule = [
@@ -394,7 +367,6 @@ in
         }
       ];
 
-      # mango's hotarea_size/enable_hotarea.
       hot_corners.top_left = {
         enabled = true;
         delay_ms = 500;

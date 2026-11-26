@@ -33,9 +33,12 @@ local firing_debounce = false
 local queue_skip -- forward: Player.next/prev coalesce through this, defined below
 local advance_steps -- forward: play_index auto-skip and queue_skip use it
 
--- Bounded recovery: a failed resolve skips at most a couple of tracks before
--- stopping, and a track that already failed/restarted is not retried in a loop.
-local resolve_failures = 0
+-- A failed stream resolve retries the SAME track once with a fresh URL before
+-- giving up. If both attempts fail we jump to the next locally cached (thus
+-- guaranteed playable) track instead of forcing a manual click or burning 20s
+-- per broken yt-dlp resolve on each following uncached track.
+local resolve_retry_id = nil
+local resolve_retry_at = 0
 local error_retry_id = nil
 local error_retry_at = 0
 local stalled_retry_id = nil
@@ -195,7 +198,17 @@ local function player_set(item, stream_url)
 		title = item.title .. " - " .. item.artist
 	end
 
-	if api and api.cache_audio and item.id and item.id ~= "" then
+	-- Auto-caching each played track costs a long-running yt-dlp download per
+	-- song and competes with stream resolves for the host's limited async
+	-- slots. The plugin setting lets users turn it off; explicit downloads
+	-- (Offline page / track action) go through downloader.luau and are unaffected.
+	if
+		noctalia.getConfig("auto_cache") ~= false
+		and api
+		and api.cache_audio
+		and item.id
+		and item.id ~= ""
+	then
 		api.cache_audio(item.id, function(ok)
 			if ok then
 				local was_cached = (state.cached_audio_ids and state.cached_audio_ids[item.id] == true)
@@ -274,6 +287,28 @@ local function pick_playable_cycle(start_idx, queue)
 	return nil, n
 end
 
+-- When the extractor is broken, uncached tracks are all unplayable. Find the
+-- nearest following cached track so one failure does not turn into a long run
+-- of silent 20-second timeouts. Bounded so a mostly-uncached queue still stops
+-- instead of scanning hundreds of entries.
+local function find_cached_ahead(from_index, max_steps)
+	if not api or not api.get_audio_cache_path then
+		return nil
+	end
+	local queue = state.player.queue
+	for offset = 1, max_steps do
+		local idx = from_index + offset
+		if idx > #queue then
+			break
+		end
+		local t = queue[idx]
+		if t and t.id and api.get_audio_cache_path(t.id) then
+			return offset, t
+		end
+	end
+	return nil
+end
+
 function Player.play_index(index, queue)
 	queue = queue or state.player.queue
 	if #queue == 0 then
@@ -299,6 +334,9 @@ function Player.play_index(index, queue)
 	-- Any new play intent invalidates every in-flight resolve before it.
 	play_generation = play_generation + 1
 	local gen = play_generation
+	-- Each explicit play gets its own single retry; a manual replay of a track
+	-- that failed a minute ago should not be denied that retry.
+	resolve_retry_id = nil
 
 	-- When offline, silently jump past undownloaded entries (covers natural
 	-- advance, manual next/prev and clicks into partial playlists). Repeat
@@ -353,7 +391,7 @@ function Player.play_index(index, queue)
 	state.player.eof = false
 	eof_retries = 0
 
-	local function on_resolved(url)
+	local function on_resolved(url, reason)
 		if gen ~= play_generation then
 			log(
 				"play_index: dropped stale stream response (gen "
@@ -367,26 +405,63 @@ function Player.play_index(index, queue)
 			return
 		end
 		if not url or url == "" then
-			log("play_index: stream resolve FAILED for '" .. tostring(item.title) .. "'")
-			resolve_failures = resolve_failures + 1
-			-- One failed resolve (expired URL, transient extractor hiccup,
-			-- refused spawn) should not end the listening session. Move on;
-			-- bounded so a broken queue still stops instead of spinning.
-			if resolve_failures <= 2 and #state.player.queue > 1 then
-				state.status_text = "Could not play " .. tostring(item.title or "track") .. " — skipping"
-				noctalia.notify("YouTube Music", state.status_text)
-				pending_steps = pending_steps + 1
-				advance_steps()
-			else
-				resolve_failures = 0
-				state.player.status = "stopped"
-				state.status_text = "Could not resolve stream for " .. tostring(item.title)
+			log(
+				"play_index: stream resolve FAILED for '"
+					.. tostring(item.title)
+					.. "': "
+					.. tostring(reason or "unknown")
+			)
+			local now = noctalia.nowMs()
+			local can_retry = item.id
+				and item.id ~= ""
+				and api
+				and api.invalidate_stream
+				and (resolve_retry_id ~= item.id or now - resolve_retry_at > 60000)
+			if can_retry then
+				resolve_retry_id = item.id
+				resolve_retry_at = now
+				api.invalidate_stream(item.id)
+				state.status_text = "Retrying " .. tostring(item.title or "track") .. " with a fresh URL"
+				log("play_index: retrying same track once with a fresh URL")
 				publish()
+				api.resolve_stream(item.id, on_resolved)
+				return
+			end
+			-- No manual click needed: jump straight to the next cached track.
+			-- Retrying every uncached entry would burn ~20s each on an
+			-- extractor that is broken for all of them.
+			resolve_retry_id = nil
+			local detail = tostring(reason or "stream unavailable")
+			local offset, target = find_cached_ahead(state.player.index, 8)
+			if offset then
+				state.status_text = "Could not play "
+					.. tostring(item.title or "track")
+					.. " — skipping "
+					.. offset
+					.. " track(s) to "
+					.. tostring(target.title or "next cached track")
+				log(
+					"play_index: jumping "
+						.. offset
+						.. " track(s) to cached '"
+						.. tostring(target.title)
+						.. "'"
+				)
+				pending_steps = pending_steps + offset
+			else
+				state.player.status = "stopped"
+				state.status_text = "Could not play " .. tostring(item.title or "track") .. ": " .. detail .. " — no playable track ahead, stopping"
+				log("play_index: no cached track ahead, stopping")
+			end
+			publish()
+			noctalia.notify("YouTube Music", state.status_text)
+			if state.player.status ~= "stopped" then
+				advance_steps()
 			end
 			return
 		end
 
-		resolve_failures = 0
+		resolve_retry_id = nil
 		log("play_index: stream resolved (" .. #url .. " chars), dispatching to mpv")
 		player_set(item, url)
 	end
@@ -583,7 +658,6 @@ function Player.next(is_natural_end)
 	if #state.player.queue == 0 then
 		return
 	end
-
 	if is_natural_end and state.player.repeat_mode == "one" then
 		log("next: repeat_mode=one, looping track id=" .. tostring(state.player.id))
 		mpv.send((noctalia.json.encode({ command = { "set_property", "pause", false } })))

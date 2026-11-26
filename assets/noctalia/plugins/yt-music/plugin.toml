@@ -16,6 +16,13 @@ label_key = "settings.debug_logging.label"
 description_key = "settings.debug_logging.description"
 default = false
 
+[[setting]]
+key = "auto_cache"
+type = "bool"
+label_key = "settings.auto_cache.label"
+description_key = "settings.auto_cache.description"
+default = true
+
 [[widget]]
 id = "widget"
 entry = "widget.luau"

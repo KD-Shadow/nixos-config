@@ -37,8 +37,12 @@
     };
     luciole.url = "github:noctalia-dev/luciole";
     limusic.url = "path:./apps/limusic";
-    strata.url = "path:./apps/strata";
+    # strata.url = "path:./apps/strata";
     umbriel.url = "github:noctalia-dev/umbriel";
+    strata = {
+      url = "github:lgse/strata";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
 

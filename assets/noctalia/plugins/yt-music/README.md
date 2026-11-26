@@ -69,11 +69,17 @@ missing), and re-adding a track is a no-op.
 Download individual tracks or entire playlists for offline playback. Audio,
 stream, thumbnail, and playlist caches are sized and clearable in Settings.
 
+By default every played track is also downloaded into the offline cache. Turn
+off **Auto-cache while playing** in the plugin settings to stop this; explicit
+downloads still work. Disabling it cuts the number of `yt-dlp` jobs per song,
+which also avoids the intermittent skips caused by busy async slots.
+
 ## Settings
 
 | Setting | Type | Default | Description |
 | --- | --- | --- | --- |
 | `debug_logging` | `bool` | `false` | Write verbose logs to the plugin log file to help troubleshoot issues. |
+| `auto_cache` | `bool` | `true` | Download each played track into the offline cache. Turn off to reduce yt-dlp load and skipped songs. |
 
 ## IPC
 
@@ -108,8 +114,11 @@ The bar widget also opens entries directly (`panel-toggle sh4dow/yt-music:mini` 
   sign-in page to authenticate.
 - **MPRIS transport** — with `mpv-mpris` installed, a three-entry mpv
   playlist keeps the media widget and `playerctl` transport controls aligned
-  with the plugin queue. Failed pre-playback streams stop with a notification;
-  builds without lavfi leave those external controls unavailable.
+  with the plugin queue. A failed stream resolve retries that track once, then
+  jumps straight to the next locally cached (playable) track with a visible
+  reason, avoiding a long run of broken `yt-dlp` timeouts. If no cached track is
+  ahead it stops instead of silently eating the queue. Builds without lavfi
+  leave those external controls unavailable.
 
 ### Debug log
 

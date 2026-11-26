@@ -3,6 +3,10 @@
     "debug_logging": {
       "description": "Escribe registros detallados en el archivo de registro del plugin para ayudar a solucionar problemas.",
       "label": "Registro de depuración"
+    },
+    "auto_cache": {
+      "description": "Descarga cada canción reproducida a la caché sin conexión. Desactívalo para reducir la carga de yt-dlp y las canciones omitidas.",
+      "label": "Cache automática durante la reproducción"
     }
   }
 }

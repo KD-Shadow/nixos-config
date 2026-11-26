@@ -3,6 +3,10 @@
     "debug_logging": {
       "description": "Write verbose logs to the plugin log file to help troubleshoot issues.",
       "label": "Debug logging"
+    },
+    "auto_cache": {
+      "description": "Download each played track to the offline cache. Turn off to reduce yt-dlp load and skipped songs.",
+      "label": "Auto-cache while playing"
     }
   }
 }

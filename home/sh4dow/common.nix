@@ -8,7 +8,6 @@
   ./development/herdr.nix
   ./desktop/gtk.nix
   ./system/utils.nix
-  # ./applications/librewolf.nix
   ./applications/firefox.nix
   ./applications/zed.nix
   ./applications/tldraw.nix
@@ -52,7 +51,15 @@
       libnotify
       zoxide
       ffmpeg
-      yt-dlp
+      (yt-dlp.overrideAttrs (old: {
+        version = "2026.11.23";
+        src = fetchFromGitHub {
+          owner = "yt-dlp";
+          repo = "yt-dlp";
+          tag = "2026.11.23";
+          hash = "sha256-BpxnzY9GOs9sTv/ZWAwYiiJS7VfaMtp5HHOtXDAGgc0=";
+        };
+      }))
       cava
       # pcmanfm
       fastfetch

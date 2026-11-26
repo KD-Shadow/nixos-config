@@ -112,8 +112,6 @@
         };
       in {
         mango = portalBackends;
-        # Umbriel's NixOS module supplies `default = [ "umbriel" "gtk" ]`,
-        # so only the shared backend overrides are set here.
         umbriel = builtins.removeAttrs portalBackends [ "default" ];
       };
   };
@@ -184,6 +182,7 @@
       ps.numpy
       ps.onnxruntime
       ps.pillow
+      ps.tomlkit 
    ]))
   ];
 
